@@ -3,6 +3,7 @@ package com.ibra.projecttracker.entity;
 import com.ibra.projecttracker.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.sql.ast.tree.update.Assignment;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name="tasks")
+@ToString(exclude = {"project", "taskAssignments"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

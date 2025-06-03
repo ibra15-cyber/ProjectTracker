@@ -3,6 +3,7 @@ package com.ibra.projecttracker.controller;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.service.DeveloperService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class DeveloperController {
 
 
     @PostMapping("/create-developer")
-    public ResponseEntity<Response> createDeveloper(@RequestBody DeveloperDTO developerDTO) {
+    public ResponseEntity<Response> createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO newDeveloper = developerService.createDeveloper(developerDTO);
         Response response = Response.builder()
                 .message("Developer created successfully")
@@ -42,7 +43,7 @@ public class DeveloperController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getDeveloperById(@PathVariable("id") Long id) {
+    public ResponseEntity<Response> getDeveloperById(@Valid @PathVariable("id") Long id) {
         DeveloperDTO developerDTO = developerService.getDeveloperById(id);
         Response response = Response.builder()
                 .message("Developer retrieved successfully")
@@ -53,7 +54,7 @@ public class DeveloperController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateDeveloper(@PathVariable("id") Long id, @RequestBody DeveloperDTO developerDTO) {
+    public ResponseEntity<Response> updateDeveloper(@PathVariable("id") Long id, @Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO updateDeveloper = developerService.updateDeveloper(id, developerDTO);
         Response response = Response.builder()
                 .message("Developer updated successfully")

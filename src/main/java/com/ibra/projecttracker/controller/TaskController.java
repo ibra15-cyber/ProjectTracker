@@ -3,6 +3,7 @@ package com.ibra.projecttracker.controller;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class TaskController {
 
 
     @PostMapping("/create-task")
-    public ResponseEntity<Response> createTask(@RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<Response> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO newTask = taskService.createTask(taskDTO);
         Response response = Response.builder()
                 .message("Task created successfully")
@@ -53,7 +54,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO updateTask = taskService.updateTask(id, taskDTO);
         Response response = Response.builder()
                 .message("Task updated successfully")

@@ -3,12 +3,14 @@ package com.ibra.projecttracker.entity;
 import com.ibra.projecttracker.enums.DevSkills;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.Set;
 
 @Data
 @Entity
 @Table(name="developers")
+@ToString(exclude = {"taskAssignments"})
 public class Developer {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

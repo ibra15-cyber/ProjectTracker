@@ -1,36 +1,38 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.AssignTaskRequest;
+import com.ibra.projecttracker.dto.TaskAssignmentDTO;
 import com.ibra.projecttracker.dto.Response;
-import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.TaskAssignment;
-import com.ibra.projecttracker.repository.TaskAssignmentRepository;
+import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.service.TaskAssignmentService;
-import com.ibra.projecttracker.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/task-assignment")
 public class TaskAssignmentController {
 
     private final TaskAssignmentService taskAssignmentService;
+    private final EntityDTOMapper entityDTOMapper;
 
-    public TaskAssignmentController(TaskAssignmentService taskAssignmentService) {
+    public TaskAssignmentController(TaskAssignmentService taskAssignmentService, EntityDTOMapper entityDTOMapper) {
         this.taskAssignmentService = taskAssignmentService;
+        this.entityDTOMapper = entityDTOMapper;
     }
 
 
     @PostMapping("/create-task-assignment")
-    public ResponseEntity<Response> createTask(@RequestBody AssignTaskRequest assignTaskRequest) {
-        TaskAssignment newTask = taskAssignmentService.createTask(assignTaskRequest);
+    public ResponseEntity<Response> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
+        TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
         Response response = Response.builder()
                 .message("Task created successfully")
                 .statusCode(String.valueOf(HttpStatus.CREATED))
-                .taskAssignment(newTask)
+                .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(newTask))
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -38,10 +40,11 @@ public class TaskAssignmentController {
     @GetMapping("/get-all")
     public ResponseEntity<Response> getAllTasks() {
         List<TaskAssignment> assignTaskRequests = taskAssignmentService.getAllTaskAssignments();
+        List<TaskAssignmentDTO> assignmentDTOS = assignTaskRequests.stream().map(entityDTOMapper::mapTaskAssignmentToDTO).collect(Collectors.toList());
         Response response = Response.builder()
                 .message("All tasks retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
-                .taskAssignments(assignTaskRequests)
+                .taskAssignments(assignmentDTOS)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -52,18 +55,18 @@ public class TaskAssignmentController {
         Response response = Response.builder()
                 .message("Task retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
-                .taskAssignment(assignTaskRequest)
+                .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(assignTaskRequest))
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @RequestBody AssignTaskRequest assignTaskRequest) {
-        TaskAssignment updateTask = taskAssignmentService.updateTask(id, assignTaskRequest);
+    public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @Valid  @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
+        TaskAssignment updateTask = taskAssignmentService.updateTask(id, taskAssignmentDTO);
         Response response = Response.builder()
                 .message("Task updated successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
-                .taskAssignment(updateTask)
+                .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(updateTask))
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

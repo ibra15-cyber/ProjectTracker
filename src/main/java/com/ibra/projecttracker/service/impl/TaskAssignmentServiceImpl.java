@@ -1,9 +1,7 @@
 package com.ibra.projecttracker.service.impl;
 
-import com.ibra.projecttracker.dto.AssignTaskRequest;
-import com.ibra.projecttracker.dto.TaskDTO;
+import com.ibra.projecttracker.dto.TaskAssignmentDTO;
 import com.ibra.projecttracker.entity.Developer;
-import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.entity.TaskAssignment;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
@@ -17,7 +15,6 @@ import com.ibra.projecttracker.service.TaskService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskAssignmentServiceImpl implements TaskAssignmentService {
@@ -38,20 +35,21 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     }
 
     @Override
-    public TaskAssignment createTask(AssignTaskRequest assignTaskRequest) {
+    public TaskAssignment createTask(TaskAssignmentDTO taskAssignmentDTO) {
+        System.out.println(taskAssignmentDTO);
         TaskAssignment taskAssignment = new TaskAssignment();
 
-        Task task = taskRepository.findById(assignTaskRequest.getTaskId())
+        Task task = taskRepository.findById(taskAssignmentDTO.getTaskId())
                 .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
         taskAssignment.setTask(task);
 
-        Developer developer = developerRepository.findById(assignTaskRequest.getAssigneeId())
+        Developer developer = developerRepository.findById(taskAssignmentDTO.getAssigneeId())
                 .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
         taskAssignment.setDeveloper(developer);
 
-        taskAssignment.setStatus(assignTaskRequest.getStatus());
-        taskAssignment.setAssignedOn(assignTaskRequest.getAssignedOn());
-        taskAssignment.setCompletedOn(assignTaskRequest.getDueOn());
+        taskAssignment.setStatus(taskAssignmentDTO.getStatus());
+        taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
+        taskAssignment.setCompletedOn(taskAssignmentDTO.getDueOn());
 
         return taskAssignmentRepository.save(taskAssignment);
     }
@@ -69,25 +67,25 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
 
     @Override
-    public TaskAssignment updateTask(Long assignTaskId, AssignTaskRequest assignTaskRequest) {
+    public TaskAssignment updateTask(Long assignTaskId, TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment taskAssignment = taskAssignmentRepository.findById(assignTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskAssignment not found"));
 
-        if(assignTaskRequest.getAssigneeId() != null){
-            Developer developer = developerRepository.findById(assignTaskRequest.getAssigneeId())
+        if(taskAssignmentDTO.getAssigneeId() != null){
+            Developer developer = developerRepository.findById(taskAssignmentDTO.getAssigneeId())
                             .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
             taskAssignment.setDeveloper(developer);
         }
 
-        if(assignTaskRequest.getTaskId() != null){
-            Task task = taskRepository.findById(assignTaskRequest.getTaskId())
+        if(taskAssignmentDTO.getTaskId() != null){
+            Task task = taskRepository.findById(taskAssignmentDTO.getTaskId())
                     .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
             taskAssignment.setTask(task);
         }
 
-        if(assignTaskRequest.getStatus() != null) taskAssignment.setStatus(assignTaskRequest.getStatus());
-        if(assignTaskRequest.getAssignedOn() != null) taskAssignment.setAssignedOn(assignTaskRequest.getAssignedOn());
-        if(assignTaskRequest.getDueOn() != null) taskAssignment.setAssignedOn(assignTaskRequest.getAssignedOn());
+        if(taskAssignmentDTO.getStatus() != null) taskAssignment.setStatus(taskAssignmentDTO.getStatus());
+        if(taskAssignmentDTO.getAssignedOn() != null) taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
+        if(taskAssignmentDTO.getDueOn() != null) taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
         return taskAssignmentRepository.save(taskAssignment);
 
     }

@@ -18,6 +18,6 @@ public class Response {
     private List<TaskDTO> tasks;
     private DeveloperDTO developer;
     private List<DeveloperDTO> developers;
-    private TaskAssignment taskAssignment;
-    private List<TaskAssignment> taskAssignments;
+    private TaskAssignmentDTO taskAssignment;
+    private List<TaskAssignmentDTO> taskAssignments;
 }

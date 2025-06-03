@@ -1,8 +1,10 @@
 package com.ibra.projecttracker.entity;
 
+import com.ibra.projecttracker.enums.TaskAssignmentStatus;
 import com.ibra.projecttracker.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -16,15 +18,19 @@ public class TaskAssignment {
 
     @ManyToOne
     @JoinColumn(name = "task_id")
+    @ToString.Exclude
     private Task task;
 
     @ManyToOne
     @JoinColumn(name = "developer_id")
+    @ToString.Exclude
     private Developer developer;
 
     private LocalDateTime assignedOn;
 
-    private TaskStatus status;
+    private TaskAssignmentStatus status;
+
+    private LocalDateTime dueOn;
 
     private LocalDateTime completedOn;
 
