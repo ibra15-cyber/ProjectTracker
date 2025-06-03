@@ -2,10 +2,13 @@ package com.ibra.projecttracker.entity;
 
 import com.ibra.projecttracker.enums.DevSkills;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.Set;
 
-@Entity(name="developers")
+@Data
+@Entity
+@Table(name="developers")
 public class Developer {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

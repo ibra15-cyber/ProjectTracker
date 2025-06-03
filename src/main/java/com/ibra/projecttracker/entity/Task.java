@@ -2,12 +2,15 @@ package com.ibra.projecttracker.entity;
 
 import com.ibra.projecttracker.enums.TaskStatus;
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.sql.ast.tree.update.Assignment;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Entity(name="tasks")
+@Data
+@Entity
+@Table(name="tasks")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

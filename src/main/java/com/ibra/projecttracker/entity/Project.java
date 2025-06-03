@@ -2,13 +2,16 @@ package com.ibra.projecttracker.entity;
 
 import com.ibra.projecttracker.enums.ProjectStatus;
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity(name="projects")
+@Data
+@Entity
+@Table(name="projects")
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
