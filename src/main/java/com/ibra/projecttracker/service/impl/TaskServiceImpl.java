@@ -35,7 +35,7 @@ public class TaskServiceImpl implements TaskService {
         newTask.setTitle(taskDTO.getTitle());
         newTask.setDescription(taskDTO.getDescription());
         newTask.setStatus(taskDTO.getStatus());
-        newTask.setDueDate(taskDTO.getDueDate());
+        newTask.setDeadline(taskDTO.getDeadline());
         Long projectId = taskDTO.getProjectId();
         Project foundProject = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         newTask.setProject(foundProject);
@@ -73,8 +73,14 @@ public class TaskServiceImpl implements TaskService {
 
         if (taskDTO.getTitle() != null) taskToUpdate.setTitle(taskDTO.getTitle());
         if (taskDTO.getDescription() != null) taskToUpdate.setDescription(taskDTO.getDescription());
-        if (taskDTO.getStatus() != null) taskToUpdate.setStatus(taskDTO.getStatus());
-        if (taskDTO.getDueDate() != null) taskToUpdate.setDueDate(taskDTO.getDueDate());
+        if (taskDTO.getStatus() != null) {
+            taskToUpdate.setStatus(taskDTO.getStatus());
+//            auditLogService.logTaskStatusChange(taskId, taskToUpdate.getStatus().toString(), taskDTO.getStatus().toString());
+        }
+        if (taskDTO.getDeadline() != null) {
+            taskToUpdate.setDeadline(taskDTO.getDeadline());
+//            auditLogService.logTaskDeadlineChange(taskId, taskToUpdate.getDeadline(), taskDTO.getDeadline());
+        }
         if (taskDTO.getProjectId() != null) {
             Project project = projectRepository.findById(taskDTO.getProjectId())
                     .orElseThrow(() -> new ResourceNotFoundException("Project not found!"));
@@ -83,7 +89,7 @@ public class TaskServiceImpl implements TaskService {
 
         Task savedTask = taskRepository.save(taskToUpdate);
 
-        auditLogService.logTaskUpdate(savedTask.getTaskId(), taskToUpdate, savedTask.toString());
+        auditLogService.logTaskUpdate(savedTask.getTaskId(), taskToUpdate, savedTask);
 
         return entityDTOMapper.mapTaskToTaskDTO(savedTask);
     }

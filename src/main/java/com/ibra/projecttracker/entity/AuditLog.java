@@ -1,7 +1,5 @@
 package com.ibra.projecttracker.entity;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -13,8 +11,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Getter
-@Setter
 @Document(collection = "audit_logs")
 public class AuditLog {
 
@@ -43,7 +39,7 @@ public class AuditLog {
     private String actorName;
 
     @Field("payload")
-    private JsonNode payload;
+    private String payload;
 
     public AuditLog() {
         this.timestamp = LocalDateTime.now();
@@ -58,26 +54,91 @@ public class AuditLog {
     }
 
     public AuditLog(String actionType, String entityType, String entityId,
-                    String actorName, JsonNode payload) {
+                    String actorName, String payload) {
         this(actionType, entityType, entityId, actorName);
         this.payload = payload;
     }
 
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getActorName() {
+        return actorName;
+    }
+
+    public void setActorName(String actorName) {
+        this.actorName = actorName;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
+
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
+
     // Utility methods for common action types
-    public static AuditLog createLog(String entityType, String entityId, String actorName, JsonNode payload) {
+    public static AuditLog createLog(String entityType, String entityId, String actorName, String payload) {
         return new AuditLog("CREATE", entityType, entityId, actorName, payload);
     }
 
-    public static AuditLog updateLog(String entityType, String entityId, String actorName, JsonNode payload) {
+    public static AuditLog updateLog(String entityType, String entityId, String actorName, String payload) {
         return new AuditLog("UPDATE", entityType, entityId, actorName, payload);
     }
 
-    public static AuditLog deleteLog(String entityType, String entityId, String actorName, JsonNode payload) {
+    public static AuditLog deleteLog(String entityType, String entityId, String actorName, String payload) {
         return new AuditLog("DELETE", entityType, entityId, actorName, payload);
     }
 
     public static AuditLog readLog(String entityType, String entityId, String actorName) {
         return new AuditLog("READ", entityType, entityId, actorName);
+    }
+
+    public static AuditLog loginLog(String actorName, String payload) {
+        return new AuditLog("LOGIN", "USER", actorName, actorName, payload);
+    }
+
+    public static AuditLog logoutLog(String actorName) {
+        return new AuditLog("LOGOUT", "USER", actorName, actorName);
     }
 
     @Override

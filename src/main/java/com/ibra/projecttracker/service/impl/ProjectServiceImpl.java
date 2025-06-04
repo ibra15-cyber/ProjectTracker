@@ -69,16 +69,22 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDTO updateProject(Long projectId, ProjectDTO projectDTO) {
-        Project project = projectRepository.findById(projectId)
+        Project projectToUpdate = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
-        if (projectDTO.getName() != null) project.setName(projectDTO.getName());
-        if (projectDTO.getDescription() != null) project.setDescription(projectDTO.getDescription());
-        if (projectDTO.getDeadline() != null) project.setDeadline(projectDTO.getDeadline());
-        if (projectDTO.getStatus() != null) project.setStatus(projectDTO.getStatus());
+        if (projectDTO.getName() != null) projectToUpdate.setName(projectDTO.getName());
+        if (projectDTO.getDescription() != null) projectToUpdate.setDescription(projectDTO.getDescription());
+        if (projectDTO.getDeadline() != null) {
+            projectToUpdate.setDeadline(projectDTO.getDeadline());
+            auditLogService.logProjectDeadlineChange(projectId, projectToUpdate.getDeadline(), projectDTO.getDeadline());
+        }
+        if (projectDTO.getStatus() != null) {
+            projectToUpdate.setStatus(projectDTO.getStatus());
+            auditLogService.logProjectStatusChange(projectId, projectToUpdate.getStatus().toString(), projectDTO.getStatus().toString());
+        }
 
-        Project updatedProject = projectRepository.save(project);
+        Project updatedProject = projectRepository.save(projectToUpdate);
 
-        auditLogService.logProjectUpdate(projectId, project, updatedProject);
+        auditLogService.logProjectUpdate(projectId, projectToUpdate, updatedProject);
 
         return entityDTOMapper.mapProjectToProjectDTO(projectRepository.save(updatedProject));
     }

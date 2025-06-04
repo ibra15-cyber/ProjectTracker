@@ -7,7 +7,6 @@ import lombok.Data;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Data
 public class TaskDTO {
@@ -23,7 +22,7 @@ public class TaskDTO {
     private TaskStatus status;
 
     @Future(message = "Due date must be in the future")
-    private LocalDateTime dueDate;
+    private LocalDateTime deadline;
 
     @Positive(message = "Project ID must be positive")
     private Long projectId;

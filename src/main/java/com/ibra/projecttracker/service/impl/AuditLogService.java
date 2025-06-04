@@ -36,7 +36,7 @@ public class AuditLogService {
     public void logCreate(String entityType, String entityId, Object entity) {
         try {
             JsonNode payload = objectMapper.valueToTree(entity);
-            AuditLog log = AuditLog.createLog(entityType, entityId, getCurrentUser(), payload);
+            AuditLog log = AuditLog.createLog(entityType, entityId, getCurrentUser(), payload.toString());
             auditLogRepository.save(log);
         } catch (Exception e) {
             log.debug("Failed to save audit log: " + e.getMessage());
@@ -54,7 +54,7 @@ public class AuditLogService {
             payloadNode.set("before", oldPayload);
             payloadNode.set("after", newPayload);
 
-            AuditLog log = AuditLog.updateLog(entityType, entityId, getCurrentUser(), payloadNode);
+            AuditLog log = AuditLog.updateLog(entityType, entityId, getCurrentUser(), payloadNode.toString());
             auditLogRepository.save(log);
         } catch (Exception e) {
             System.err.println("Failed to create audit log: " + e.getMessage());
@@ -65,7 +65,7 @@ public class AuditLogService {
     public void logDelete(String entityType, String entityId, Object entity) {
         try {
             JsonNode payload = objectMapper.valueToTree(entity);
-            AuditLog log = AuditLog.deleteLog(entityType, entityId, getCurrentUser(), payload);
+            AuditLog log = AuditLog.deleteLog(entityType, entityId, getCurrentUser(), payload.toString());
             auditLogRepository.save(log);
         } catch (Exception e) {
             System.err.println("Failed to create audit log: " + e.getMessage());
@@ -125,7 +125,36 @@ public class AuditLogService {
             payload.put("newStatus", newStatus);
             payload.put("changedAt", LocalDateTime.now().toString());
 
-            AuditLog log = new AuditLog("STATUS_CHANGE", "TASK", taskId.toString(), getCurrentUser(), payload);
+            AuditLog log = new AuditLog("STATUS_CHANGE", "TASK", taskId.toString(), getCurrentUser(), payload.toString());
+            auditLogRepository.save(log);
+        } catch (Exception e) {
+            System.err.println("Failed to create audit log: " + e.getMessage());
+        }
+    }
+
+    public void logTaskDeadlineChange(Long taskId, LocalDateTime oldDeadline, LocalDateTime newDeadline) {
+        try {
+            var payload = objectMapper.createObjectNode();
+            payload.put("oldDeadline", oldDeadline.toString());
+            payload.put("newDeadline", newDeadline.toString());
+            payload.put("changedAt", LocalDateTime.now().toString());
+
+            AuditLog log = new AuditLog("DEADLINE_CHANGE", "TASK", taskId.toString(), getCurrentUser(), payload.toString());
+            auditLogRepository.save(log);
+        } catch (Exception e) {
+            log.error("Failed to create audit log: {}", e.getMessage());
+            System.err.println("Failed to create audit log: " + e.getMessage());
+        }
+    }
+
+    public void logProjectStatusChange(Long projectId, String oldStatus, String newStatus) {
+        try {
+            var payload = objectMapper.createObjectNode();
+            payload.put("oldStatus", oldStatus);
+            payload.put("newStatus", newStatus);
+            payload.put("changedAt", LocalDateTime.now().toString());
+
+            AuditLog log = new AuditLog("STATUS_CHANGE", "PROJECT", projectId.toString(), getCurrentUser(), payload.toString());
             auditLogRepository.save(log);
         } catch (Exception e) {
             System.err.println("Failed to create audit log: " + e.getMessage());
@@ -139,7 +168,7 @@ public class AuditLogService {
             payload.put("newDeadline", newDeadline.toString());
             payload.put("changedAt", LocalDateTime.now().toString());
 
-            AuditLog log = new AuditLog("DEADLINE_CHANGE", "PROJECT", projectId.toString(), getCurrentUser(), payload);
+            AuditLog log = new AuditLog("DEADLINE_CHANGE", "PROJECT", projectId.toString(), getCurrentUser(), payload.toString());
             auditLogRepository.save(log);
         } catch (Exception e) {
             log.error("Failed to create audit log: {}", e.getMessage());

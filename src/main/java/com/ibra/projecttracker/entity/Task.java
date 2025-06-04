@@ -4,12 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibra.projecttracker.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
-import org.hibernate.sql.ast.tree.update.Assignment;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
@@ -22,7 +19,7 @@ public class Task {
     private String title;
     private String description;
     private TaskStatus status;
-    private LocalDateTime dueDate;
+    private LocalDateTime deadline;
 
     @JsonIgnore
     @ManyToOne
