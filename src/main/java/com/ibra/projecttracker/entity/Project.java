@@ -1,5 +1,6 @@
 package com.ibra.projecttracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,9 +20,11 @@ public class Project {
 
     private String name;
     private String description;
+    private LocalDateTime createdAt;
     private LocalDateTime deadline;
     private ProjectStatus status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks;
 

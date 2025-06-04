@@ -17,7 +17,7 @@ public class TaskAssignment {
     private Long taskAssignmentId;
 
     @ManyToOne
-    @JoinColumn(name = "task_id")
+    @JoinColumn(name = "task_id", referencedColumnName = "taskId")
     @ToString.Exclude
     private Task task;
 

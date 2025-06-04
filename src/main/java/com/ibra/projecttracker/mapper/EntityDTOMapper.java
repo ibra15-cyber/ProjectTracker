@@ -22,6 +22,7 @@ public class EntityDTOMapper {
         projectDTO.setName(project.getName());
         projectDTO.setDescription(project.getDescription());
         projectDTO.setStatus(project.getStatus());
+        projectDTO.setCreatedAt(project.getCreatedAt());
         projectDTO.setDeadline(project.getDeadline());
         return projectDTO;
     }

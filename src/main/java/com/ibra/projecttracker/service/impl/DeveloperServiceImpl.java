@@ -16,17 +16,16 @@ public class DeveloperServiceImpl implements DeveloperService {
 
     private final DeveloperRepository developerRepository;
     private final EntityDTOMapper entityDTOMapper;
+    private final AuditLogService auditLogService;
 
-    public DeveloperServiceImpl(DeveloperRepository developerRepository, EntityDTOMapper entityDTOMapper) {
+    public DeveloperServiceImpl(DeveloperRepository developerRepository, EntityDTOMapper entityDTOMapper, AuditLogService auditLogService) {
         this.developerRepository = developerRepository;
         this.entityDTOMapper = entityDTOMapper;
+        this.auditLogService = auditLogService;
     }
 
     @Override
     public DeveloperDTO createDeveloper(DeveloperDTO developerDTO) {
-        if (developerDTO.getName() == null || developerDTO.getName().isEmpty() ) {
-            return null;
-        }
         Developer developer = new Developer();
         developer.setDeveloperId(developerDTO.getId());
         developer.setName(developerDTO.getName());
@@ -34,14 +33,13 @@ public class DeveloperServiceImpl implements DeveloperService {
         developer.setSkills(developerDTO.getSkill());
         Developer savedDeveloper = developerRepository.save(developer);
 
+        auditLogService.logDeveloperCreate(savedDeveloper.getDeveloperId(), savedDeveloper);
+
         return entityDTOMapper.mapDeveloperToDeveloperDTO(savedDeveloper);
     }
 
     @Override
     public List<DeveloperDTO> getAllDevelopers() {
-        if (developerRepository.count() == 0) {
-            return null;
-        }
         List<Developer> developers = developerRepository.findAll();
         return developers.stream()
                 .map(entityDTOMapper::mapDeveloperToDeveloperDTO)
@@ -53,6 +51,9 @@ public class DeveloperServiceImpl implements DeveloperService {
 
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found!"));
+
+        auditLogService.logRead("TASK", developerId.toString());
+
         return entityDTOMapper.mapDeveloperToDeveloperDTO(developer);
     }
 
@@ -63,8 +64,10 @@ public class DeveloperServiceImpl implements DeveloperService {
         if(developerDTO.getName() != null ) developer.setName(developerDTO.getName());
         if(developerDTO.getEmail() != null ) developer.setEmail(developerDTO.getEmail());
         if(developerDTO.getSkill() != null) developer.setSkills(developerDTO.getSkill());
-
         Developer savedDeveloper = developerRepository.save(developer);
+
+        auditLogService.logDeveloperUpdate(savedDeveloper.getDeveloperId(), developer, savedDeveloper);
+
         return entityDTOMapper.mapDeveloperToDeveloperDTO(savedDeveloper);
     }
 
@@ -72,6 +75,9 @@ public class DeveloperServiceImpl implements DeveloperService {
     public void deleteDeveloper(Long developerId) {
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found!"));
+
+        auditLogService.logDeveloperDelete(developer.getDeveloperId(), developer);
+
         developerRepository.delete(developer);
     }
 }

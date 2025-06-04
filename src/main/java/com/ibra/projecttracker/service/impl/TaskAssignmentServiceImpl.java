@@ -24,19 +24,20 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     private final DeveloperRepository developerRepository;
     private final TaskService taskService;
     private final TaskAssignmentRepository taskAssignmentRepository;
+    private final AuditLogService auditLogService;
 
-    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, DeveloperRepository developerRepository, TaskService taskService, TaskAssignmentRepository taskAssignmentRepository) {
+    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, DeveloperRepository developerRepository, TaskService taskService, TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.projectRepository = projectRepository;
         this.developerRepository = developerRepository;
         this.taskService = taskService;
         this.taskAssignmentRepository = taskAssignmentRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
     public TaskAssignment createTask(TaskAssignmentDTO taskAssignmentDTO) {
-        System.out.println(taskAssignmentDTO);
         TaskAssignment taskAssignment = new TaskAssignment();
 
         Task task = taskRepository.findById(taskAssignmentDTO.getTaskId())
@@ -51,7 +52,11 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
         taskAssignment.setCompletedOn(taskAssignmentDTO.getDueOn());
 
-        return taskAssignmentRepository.save(taskAssignment);
+        TaskAssignment savedTaskAssignment = taskAssignmentRepository.save(taskAssignment);
+
+        auditLogService.logTaskAssignmentCreate(savedTaskAssignment.getTaskAssignmentId(), savedTaskAssignment.getAssignedOn());
+
+        return savedTaskAssignment;
     }
 
     @Override
@@ -61,39 +66,51 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
     @Override
     public TaskAssignment getTaskAssignmentById(Long assignTaskId) {
-        return taskAssignmentRepository.findById(assignTaskId)
+        TaskAssignment foundTaskAssignment =  taskAssignmentRepository.findById(assignTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskAssignment not found"));
+        auditLogService.logRead("TASK_ASSIGNMENT", foundTaskAssignment.getTaskAssignmentId().toString());
+        return foundTaskAssignment;
+
     }
 
 
     @Override
     public TaskAssignment updateTask(Long assignTaskId, TaskAssignmentDTO taskAssignmentDTO) {
-        TaskAssignment taskAssignment = taskAssignmentRepository.findById(assignTaskId)
+        TaskAssignment taskAssignmentToUpdate = taskAssignmentRepository.findById(assignTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskAssignment not found"));
 
         if(taskAssignmentDTO.getAssigneeId() != null){
             Developer developer = developerRepository.findById(taskAssignmentDTO.getAssigneeId())
                             .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
-            taskAssignment.setDeveloper(developer);
+            taskAssignmentToUpdate.setDeveloper(developer);
         }
 
         if(taskAssignmentDTO.getTaskId() != null){
             Task task = taskRepository.findById(taskAssignmentDTO.getTaskId())
                     .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
-            taskAssignment.setTask(task);
+            taskAssignmentToUpdate.setTask(task);
         }
 
-        if(taskAssignmentDTO.getStatus() != null) taskAssignment.setStatus(taskAssignmentDTO.getStatus());
-        if(taskAssignmentDTO.getAssignedOn() != null) taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
-        if(taskAssignmentDTO.getDueOn() != null) taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
-        return taskAssignmentRepository.save(taskAssignment);
+        if(taskAssignmentDTO.getStatus() != null) taskAssignmentToUpdate.setStatus(taskAssignmentDTO.getStatus());
+        if(taskAssignmentDTO.getAssignedOn() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
+        if(taskAssignmentDTO.getDueOn() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
+        TaskAssignment updatedTaskAssignment =  taskAssignmentRepository.save(taskAssignmentToUpdate);
+
+        auditLogService.logTaskAssignmentUpdate(updatedTaskAssignment.getTaskAssignmentId(), taskAssignmentToUpdate, updatedTaskAssignment);
+
+        return updatedTaskAssignment;
 
     }
 
     @Override
     public void deleteTask(Long assignTaskId) {
-        TaskAssignment taskAssignment = taskAssignmentRepository.findById(assignTaskId)
+        TaskAssignment taskAssignmentToDelete = taskAssignmentRepository.findById(assignTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskAssignment not found"));
-         taskAssignmentRepository.delete(taskAssignment);
+
+        taskAssignmentRepository.delete(taskAssignmentToDelete);
+
+        auditLogService.logTaskAssignmentDelete(assignTaskId, taskAssignmentToDelete);
+
+
     }
 }
