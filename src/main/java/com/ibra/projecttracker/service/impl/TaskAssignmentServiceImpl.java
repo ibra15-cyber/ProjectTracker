@@ -52,11 +52,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
         taskAssignment.setCompletedOn(taskAssignmentDTO.getDueOn());
 
-        TaskAssignment savedTaskAssignment = taskAssignmentRepository.save(taskAssignment);
-
-        auditLogService.logTaskAssignmentCreate(savedTaskAssignment.getTaskAssignmentId(), savedTaskAssignment.getAssignedOn());
-
-        return savedTaskAssignment;
+        return taskAssignmentRepository.save(taskAssignment);
     }
 
     @Override
@@ -94,11 +90,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         if(taskAssignmentDTO.getStatus() != null) taskAssignmentToUpdate.setStatus(taskAssignmentDTO.getStatus());
         if(taskAssignmentDTO.getAssignedOn() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
         if(taskAssignmentDTO.getDueOn() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
-        TaskAssignment updatedTaskAssignment =  taskAssignmentRepository.save(taskAssignmentToUpdate);
 
-        auditLogService.logTaskAssignmentUpdate(updatedTaskAssignment.getTaskAssignmentId(), taskAssignmentToUpdate, updatedTaskAssignment);
-
-        return updatedTaskAssignment;
+        return taskAssignmentRepository.save(taskAssignmentToUpdate);
 
     }
 
@@ -108,7 +101,5 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("TaskAssignment not found"));
 
         taskAssignmentRepository.delete(taskAssignmentToDelete);
-
-        auditLogService.logTaskAssignmentDelete(assignTaskId, taskAssignmentToDelete);
     }
 }

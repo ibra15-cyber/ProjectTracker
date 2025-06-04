@@ -2,16 +2,16 @@ package com.ibra.projecttracker.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibra.projecttracker.dto.ProjectDTO;
 import com.ibra.projecttracker.entity.AuditLog;
-import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.repository.AuditLogRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class AuditLogService {
 
@@ -21,9 +21,8 @@ public class AuditLogService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Modified to remove security dependency
     public String getCurrentUser() {
-        return "SYSTEM"; // Always return "SYSTEM" as authentication is not implemented
+        return "SYSTEM";
     }
 
     public void saveAuditLog(AuditLog auditLog) {
@@ -34,14 +33,13 @@ public class AuditLogService {
         }
     }
 
-    // Generic logging methods
     public void logCreate(String entityType, String entityId, Object entity) {
         try {
             JsonNode payload = objectMapper.valueToTree(entity);
             AuditLog log = AuditLog.createLog(entityType, entityId, getCurrentUser(), payload);
             auditLogRepository.save(log);
         } catch (Exception e) {
-            // Log error but don't fail the main operation
+            log.debug("Failed to save audit log: " + e.getMessage());
             System.err.println("Failed to create audit log: " + e.getMessage());
         }
     }
@@ -83,7 +81,6 @@ public class AuditLogService {
         }
     }
 
-    // Entity-specific logging methods
     public void logProjectCreate(Long projectId, Object project) {
         logCreate("PROJECT", projectId.toString(), project);
     }
@@ -120,18 +117,6 @@ public class AuditLogService {
         logDelete("DEVELOPER", developerId.toString(), developer);
     }
 
-    public void logTaskAssignmentCreate(Long assignmentId, Object assignment) {
-        logCreate("TASK_ASSIGNMENT", assignmentId.toString(), assignment);
-    }
-
-    public void logTaskAssignmentUpdate(Long assignmentId, Object oldAssignment, Object newAssignment) {
-        logUpdate("TASK_ASSIGNMENT", assignmentId.toString(), oldAssignment, newAssignment);
-    }
-
-    public void logTaskAssignmentDelete(Long assignmentId, Object assignment) {
-        logDelete("TASK_ASSIGNMENT", assignmentId.toString(), assignment);
-    }
-
     // Custom logging for business events
     public void logTaskStatusChange(Long taskId, String oldStatus, String newStatus) {
         try {
@@ -157,6 +142,7 @@ public class AuditLogService {
             AuditLog log = new AuditLog("DEADLINE_CHANGE", "PROJECT", projectId.toString(), getCurrentUser(), payload);
             auditLogRepository.save(log);
         } catch (Exception e) {
+            log.error("Failed to create audit log: {}", e.getMessage());
             System.err.println("Failed to create audit log: " + e.getMessage());
         }
     }
