@@ -110,7 +110,5 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         taskAssignmentRepository.delete(taskAssignmentToDelete);
 
         auditLogService.logTaskAssignmentDelete(assignTaskId, taskAssignmentToDelete);
-
-
     }
 }

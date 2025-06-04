@@ -14,5 +14,8 @@ public interface ProjectService {
     ProjectDTO getProjectById(Long projectId);
     ProjectDTO updateProject(Long projectId, ProjectDTO projectDTO);
     void deleteProject(Long projectId);
-
+    List<ProjectDTO> dynamicFilterProjects(Long projectId, String name, String description,
+                                           LocalDateTime createdAt, LocalDateTime deadline,
+                                           ProjectStatus status, int pageSize, int pageNumber,
+                                           String sortBy);
 }

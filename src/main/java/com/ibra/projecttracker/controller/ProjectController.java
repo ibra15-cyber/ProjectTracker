@@ -78,4 +78,32 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<Response> filterProject(@RequestParam(required = false) Long projectId,
+                                                  @RequestParam(required = false) String name,
+                                                  @RequestParam(required = false) String description,
+                                                  @RequestParam(required = false)
+                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                  LocalDateTime createdAt,
+                                                  @RequestParam(required = false)
+                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                  LocalDateTime deadline,
+                                                  @RequestParam(required = false) ProjectStatus status,
+                                                  @RequestParam(defaultValue = "0") int pageNumber,
+                                                  @RequestParam(defaultValue = "100") int pageSize,
+                                                  @RequestParam(defaultValue = "projectId") String sortBy) {
+
+        List<ProjectDTO> projectDTOS = projectService.dynamicFilterProjects(projectId, name, description,
+                createdAt, deadline, status, pageSize, pageNumber, sortBy);
+
+        Response response = Response.builder()
+                .message("Projects retrieved successfully")
+                .statusCode(String.valueOf(HttpStatus.OK))
+                .projects(projectDTOS)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
 }

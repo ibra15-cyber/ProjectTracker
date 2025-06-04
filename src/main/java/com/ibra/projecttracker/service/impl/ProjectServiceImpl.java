@@ -7,6 +7,7 @@ import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.service.ProjectService;
+import com.ibra.projecttracker.specification.ProjectSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -92,6 +93,35 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.delete(project);
 
     }
+
+    @Override
+    public List<ProjectDTO> dynamicFilterProjects(Long projectId, String name, String description,
+                                                  LocalDateTime createdAt, LocalDateTime deadline,
+                                                  ProjectStatus status, int pageSize, int pageNumber,
+                                                  String sortBy) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                Sort.by(Sort.Direction.DESC, sortBy));
+
+        Specification<Project> spec = Specification.allOf();
+        if (projectId != null) spec = spec.and(ProjectSpecification.hasProjectId(projectId));
+        if (name != null) spec = spec.and(ProjectSpecification.hasProjectName(name));
+        if (description != null) spec = spec.and(ProjectSpecification.hasDescription(description));
+        if (status != null) spec = spec.and(ProjectSpecification.hasStatus(status));
+        if (deadline != null) spec = spec.and(ProjectSpecification.hasDeadline(deadline));
+        spec = spec.and(ProjectSpecification.dueOnOrAfter(deadline));
+        spec = spec.and(ProjectSpecification.dueOnOrBefore(deadline));
+        if (createdAt != null && deadline != null) spec.and(ProjectSpecification.createdBetween(createdAt, deadline));
+
+        Page<Project> projectPages = projectRepository.findAll(spec, pageable);
+
+        log.debug("Executing dynamic filter with specification: {}", spec);
+
+//        projectPages.forEach(System.out::println);
+        return projectPages.stream()
+                .map(entityDTOMapper::mapProjectToProjectDTO)
+                .collect(Collectors.toList());
+    }
+
 
 
 }
