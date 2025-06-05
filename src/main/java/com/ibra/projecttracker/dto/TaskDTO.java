@@ -21,6 +21,8 @@ public class TaskDTO {
 
     private TaskStatus status;
 
+    private LocalDateTime createdAt;
+
     @Future(message = "Due date must be in the future")
     private LocalDateTime deadline;
 

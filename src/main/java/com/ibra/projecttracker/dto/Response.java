@@ -1,11 +1,8 @@
 package com.ibra.projecttracker.dto;
 
-import com.ibra.projecttracker.entity.Developer;
-import com.ibra.projecttracker.entity.Task;
-import com.ibra.projecttracker.entity.TaskAssignment;
+
 import lombok.Builder;
 import lombok.Data;
-import org.hibernate.dialect.DatabaseVersion;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

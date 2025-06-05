@@ -3,12 +3,17 @@ package com.ibra.projecttracker.controller;
 import com.ibra.projecttracker.dto.ProjectDTO;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.dto.TaskDTO;
+import com.ibra.projecttracker.entity.Task;
+import com.ibra.projecttracker.enums.ProjectStatus;
+import com.ibra.projecttracker.enums.TaskStatus;
 import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -84,6 +89,16 @@ public class TaskController {
                 .tasks(projectDTOS)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @GetMapping("/sort")
+    public ResponseEntity<List<Task>> getAllTasks(
+            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
+
+        List<Task> tasks = taskService.getAllTasksBySort(sortBy, sortDirection);
+        return ResponseEntity.ok(tasks);
     }
 
 }

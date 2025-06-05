@@ -1,9 +1,9 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.TaskDTO;
-import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.entity.Task;
+import com.ibra.projecttracker.enums.TaskStatus;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.DeveloperRepository;
@@ -11,8 +11,15 @@ import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +46,7 @@ public class TaskServiceImpl implements TaskService {
         newTask.setTitle(taskDTO.getTitle());
         newTask.setDescription(taskDTO.getDescription());
         newTask.setStatus(taskDTO.getStatus());
+        newTask.setCreatedAt(LocalDateTime.now());
         newTask.setDeadline(taskDTO.getDeadline());
         Long projectId = taskDTO.getProjectId();
         Project foundProject = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -118,4 +126,25 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toList());
     }
 
+    public List<Task> getAllTasksBySort(String sortBy, String sortDirection) {
+        Sort.Direction direction = Sort.Direction.ASC;
+        if (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        if (!isValidSortProperty(sortBy)) {
+            throw new IllegalArgumentException("Invalid sort property: " + sortBy);
+        }
+
+        Sort sort = Sort.by(direction, sortBy); // Spring Data JPA handles the type mapping
+        return taskRepository.findAll(sort);
+    }
+
+    private boolean isValidSortProperty(String property) {
+        return property != null && (
+                property.equalsIgnoreCase("createdAt") ||
+                        property.equalsIgnoreCase("deadline") ||
+                        property.equalsIgnoreCase("status")
+        );
+    }
 }

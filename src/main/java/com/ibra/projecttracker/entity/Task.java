@@ -19,6 +19,7 @@ public class Task {
     private String title;
     private String description;
     private TaskStatus status;
+    private LocalDateTime createdAt;
     private LocalDateTime deadline;
 
     @JsonIgnore

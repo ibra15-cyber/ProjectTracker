@@ -17,10 +17,4 @@ public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
     List<AuditLog> findByActionTypeOrderByTimestampDesc(String actionType);
 
     List<AuditLog> findAllByOrderByTimestampDesc();
-
-    List<AuditLog> findByTimestampBetweenOrderByTimestampDesc(LocalDateTime start, LocalDateTime end);
-
-    List<AuditLog> findByEntityTypeOrderByTimestampDesc(String entityType);
-
-    long countByActionTypeAndTimestampAfter(String actionType, LocalDateTime after);
 }

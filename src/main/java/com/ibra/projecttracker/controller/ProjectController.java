@@ -30,7 +30,6 @@ public class ProjectController {
 
     @PostMapping("/create-project")
     public ResponseEntity<Response> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
-        System.out.println(projectDTO);
         ProjectDTO newProject = projectService.createProject(projectDTO);
         Response response = Response.builder()
                 .message("Project created successfully")
