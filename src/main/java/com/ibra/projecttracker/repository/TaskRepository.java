@@ -18,4 +18,15 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> , JpaSpecificationExecutor<Task>  {
     List<Task> findByProject(Project project);
+
+    @Query("SELECT t FROM Task t " +
+            "WHERE t.deadline < CURRENT_TIMESTAMP AND" +
+            " t.status != com.ibra.projecttracker.enums.TaskStatus.DONE")
+    List<Task> findOverdueTasks();
+
+    @Query("SELECT p.name, t.status, COUNT(t)" +
+            " FROM Project p JOIN p.tasks t" +
+            " GROUP BY p.name, t.status")
+    List<Object[]> findTaskCountsGroupedByStatusAndProject();
+
 }

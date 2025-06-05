@@ -126,7 +126,7 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toList());
     }
 
-    public List<Task> getAllTasksBySort(String sortBy, String sortDirection) {
+    public List<TaskDTO> getAllTasksBySort(String sortBy, String sortDirection) {
         Sort.Direction direction = Sort.Direction.ASC;
         if (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) {
             direction = Sort.Direction.DESC;
@@ -137,8 +137,24 @@ public class TaskServiceImpl implements TaskService {
         }
 
         Sort sort = Sort.by(direction, sortBy); // Spring Data JPA handles the type mapping
-        return taskRepository.findAll(sort);
+        List<Task> tasks = taskRepository.findAll(sort);
+        return tasks.stream()
+                .map(entityDTOMapper::mapTaskToTaskDTO)
+                .collect(Collectors.toList());
     }
+
+    @Override
+    public List<TaskDTO> findOverdueTasks() {
+        List<Task> tasks =  taskRepository.findOverdueTasks();
+        return tasks.stream().
+                map(entityDTOMapper::mapTaskToTaskDTO).toList();
+    }
+
+    @Override
+    public List<Object[]> findTaskCountsGroupedByStatusAndProject() {
+        return taskRepository.findTaskCountsGroupedByStatusAndProject();
+    }
+
 
     private boolean isValidSortProperty(String property) {
         return property != null && (

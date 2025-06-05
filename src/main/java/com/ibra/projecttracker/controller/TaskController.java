@@ -6,6 +6,7 @@ import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.enums.TaskStatus;
+import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,9 +21,11 @@ import java.util.List;
 @RequestMapping("/api/task")
 public class TaskController {
     private final TaskService taskService;
+    private final TaskRepository taskRepository;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, TaskRepository taskRepository) {
         this.taskService = taskService;
+        this.taskRepository = taskRepository;
     }
 
 
@@ -93,12 +96,35 @@ public class TaskController {
 
 
     @GetMapping("/sort")
-    public ResponseEntity<List<Task>> getAllTasks(
+    public ResponseEntity<Response> getAllTasks(
             @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
 
-        List<Task> tasks = taskService.getAllTasksBySort(sortBy, sortDirection);
-        return ResponseEntity.ok(tasks);
+        List<TaskDTO> tasks = taskService.getAllTasksBySort(sortBy, sortDirection);
+        Response response = Response.builder()
+                .message("All tasks retrieved successfully")
+                .statusCode(HttpStatus.OK.toString())
+                .tasks(tasks)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<Response> getOverdueTasks() {
+        List<TaskDTO> taskDTOS = taskService.findOverdueTasks();
+        Response response = Response.builder()
+                .message("Tasks retrieved successfully")
+                .statusCode(HttpStatus.OK.toString())
+                .tasks(taskDTOS)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+     @GetMapping("/countsByStatus")
+     public List<Object[]> getTaskCountsByStatus() {
+           return     taskService.findTaskCountsGroupedByStatusAndProject();
+
+     }
+
 
 }

@@ -12,5 +12,7 @@ public interface TaskService  {
     TaskDTO updateTask(Long taskId, TaskDTO taskDTO);
     void deleteTask(Long taskId);
     List<TaskDTO> getTasksByProjectId(Long projectId);
-    List<Task> getAllTasksBySort(String sortBy, String sortDirection);
+    List<TaskDTO> getAllTasksBySort(String sortBy, String sortDirection);
+    List<TaskDTO> findOverdueTasks();
+    List<Object[]> findTaskCountsGroupedByStatusAndProject();
 }

@@ -97,4 +97,12 @@ public class DeveloperServiceImpl implements DeveloperService {
 
         return developersPage.map(entityDTOMapper::mapDeveloperToDeveloperDTO);
     }
+
+    @Override
+    public List<DeveloperDTO> findTop5DevelopersWithMostTasksAssigned() {
+        List<Developer> developers =  developerRepository.findTop5DevelopersWithMostTasksAssigned();
+        return developers.stream().
+                map(entityDTOMapper::mapDeveloperToDeveloperDTO)
+                .collect(Collectors.toList());
+    }
 }

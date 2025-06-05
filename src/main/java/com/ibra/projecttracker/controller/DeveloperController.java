@@ -3,7 +3,9 @@ package com.ibra.projecttracker.controller;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.entity.Developer;
+import com.ibra.projecttracker.repository.DeveloperRepository;
 import com.ibra.projecttracker.service.DeveloperService;
+import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,9 +23,13 @@ import java.util.List;
 @RequestMapping("/api/developer")
 public class DeveloperController {
     private final DeveloperService developerService;
+    private final DeveloperRepository developerRepository;
+    private final TaskService taskService;
 
-    public DeveloperController(DeveloperService developerService) {
+    public DeveloperController(DeveloperService developerService, DeveloperRepository developerRepository, TaskService taskService) {
         this.developerService = developerService;
+        this.developerRepository = developerRepository;
+        this.taskService = taskService;
     }
 
 
@@ -96,4 +102,17 @@ public class DeveloperController {
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-}
+
+     @GetMapping("/developers/top5")
+     public ResponseEntity<Response> getTop5Developers() {
+         List<DeveloperDTO> developerDTOs = developerService.findTop5DevelopersWithMostTasksAssigned();
+         Response response = Response.builder()
+                 .message("All developers retrieved successfully")
+                 .statusCode(String.valueOf(HttpStatus.OK))
+                 .developers(developerDTOs)
+                 .build();
+
+         return ResponseEntity.status(HttpStatus.OK).body(response);
+     }
+
+   }

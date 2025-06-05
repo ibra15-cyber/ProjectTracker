@@ -15,5 +15,6 @@ public interface DeveloperService {
     DeveloperDTO updateDeveloper(Long developerId, DeveloperDTO developerDTO);
     void deleteDeveloper(Long developerId);
     Page<DeveloperDTO> getDevelopersPageable(int page, int size, String sortBy, String sortDirection);
+    List<DeveloperDTO> findTop5DevelopersWithMostTasksAssigned();
 
 }
