@@ -9,12 +9,16 @@ import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.service.ProjectService;
 import com.ibra.projecttracker.specification.ProjectSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +37,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.auditLogService = auditLogService;
     }
 
+    @Transactional
     @Override
     public ProjectDTO createProject(ProjectDTO projectDTO) {
         Project newProject = new Project();
@@ -49,6 +54,7 @@ public class ProjectServiceImpl implements ProjectService {
         return entityDTOMapper.mapProjectToProjectDTO(createdProject);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ProjectDTO> getAllProjects() {
         List<Project> projects = projectRepository.findAll();
@@ -58,6 +64,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @Transactional
+    @Cacheable(key="#projectId", value = "projects")
     public ProjectDTO getProjectById(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -67,7 +75,10 @@ public class ProjectServiceImpl implements ProjectService {
         return entityDTOMapper.mapProjectToProjectDTO(project);
     }
 
+
     @Override
+    @Transactional
+    @CachePut(value = "projects", key = "#projectId")  //there exists a property unless to filter your output
     public ProjectDTO updateProject(Long projectId, ProjectDTO projectDTO) {
         Project projectToUpdate = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -90,6 +101,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = "projects", key = "#projectId")
     public void deleteProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -101,6 +114,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProjectDTO> dynamicFilterProjects(Long projectId, String name, String description,
                                                   LocalDateTime createdAt, LocalDateTime deadline,
                                                   ProjectStatus status, int pageSize, int pageNumber,

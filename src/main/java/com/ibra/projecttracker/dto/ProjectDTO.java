@@ -4,11 +4,16 @@ import com.ibra.projecttracker.enums.ProjectStatus;
 import lombok.Data;
 
 import jakarta.validation.constraints.*;
+
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class ProjectDTO {
+public class ProjectDTO implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private Long id;
 
     @Size(min = 3, max = 100, message = "Project name must be between 3 and 100 characters")
