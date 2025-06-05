@@ -1,10 +1,13 @@
 package com.ibra.projecttracker.controller;
 
+import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.dto.ProjectDTO;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.enums.ProjectStatus;
+import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.service.ProjectService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +20,11 @@ import java.util.List;
 @RequestMapping("/api/project")
 public class ProjectController {
     private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(ProjectService projectService, ProjectRepository projectRepository) {
         this.projectService = projectService;
+        this.projectRepository = projectRepository;
     }
 
 
@@ -74,6 +79,22 @@ public class ProjectController {
         Response response = Response.builder()
                 .message("Project deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<Response> getProjectPageable(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "projectId") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+
+        Page<ProjectDTO> projectsPage = projectService.getProjectsPageable(page, size, sortBy, sortDirection);
+        Response response = Response.builder()
+                .message("All projects retrieved successfully")
+                .statusCode(String.valueOf(HttpStatus.OK))
+                .projectPage(projectsPage)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

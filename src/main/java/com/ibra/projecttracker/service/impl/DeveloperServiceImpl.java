@@ -6,6 +6,10 @@ import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.DeveloperRepository;
 import com.ibra.projecttracker.service.DeveloperService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,5 +83,18 @@ public class DeveloperServiceImpl implements DeveloperService {
         auditLogService.logDeveloperDelete(developer.getDeveloperId(), developer);
 
         developerRepository.delete(developer);
+    }
+
+    @Override
+    public Page<DeveloperDTO> getDevelopersPageable(int page, int size, String sortBy, String sortDirection) {
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Developer> developersPage = developerRepository.findAll(pageable);
+
+        developersPage.forEach(System.out::println);
+
+        return developersPage.map(entityDTOMapper::mapDeveloperToDeveloperDTO);
     }
 }

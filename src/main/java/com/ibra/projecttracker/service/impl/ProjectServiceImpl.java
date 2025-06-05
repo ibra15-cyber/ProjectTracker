@@ -1,6 +1,8 @@
 package com.ibra.projecttracker.service.impl;
 
+import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.dto.ProjectDTO;
+import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
@@ -111,6 +113,19 @@ public class ProjectServiceImpl implements ProjectService {
 
         projectRepository.delete(project);
 
+    }
+
+    @Override
+    public Page<ProjectDTO> getProjectsPageable(int page, int size, String sortBy, String sortDirection) {
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Project> projectsPage =  projectRepository.findAll(pageable);
+        projectsPage.forEach(System.out::println);
+
+        return projectsPage.map(entityDTOMapper::mapProjectToProjectDTO);
     }
 
     @Override
