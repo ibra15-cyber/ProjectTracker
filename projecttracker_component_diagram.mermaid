@@ -1,0 +1,170 @@
+graph TB
+    subgraph "Client Layer"
+        CLIENT[Web Client/API Consumer]
+        SWAGGER[Swagger UI]
+    end
+
+    subgraph "Spring Boot Application"
+        subgraph "Web Layer"
+            PC[Project Controller]
+            TC[Task Controller]
+            DC[Developer Controller]
+            TAC[Task Assignment Controller]
+            ALC[Audit Log Controller]
+        end
+
+        subgraph "Service Layer"
+            PS[Project Service]
+            TS[Task Service]
+            DS[Developer Service]
+            TAS[Task Assignment Service]
+            ALS[Audit Log Service]
+        end
+
+        subgraph "Repository Layer"
+            PR[Project Repository]
+            TR[Task Repository]
+            DR[Developer Repository]
+            TAR[Task Assignment Repository]
+            ALR[Audit Log Repository]
+        end
+
+        subgraph "Cross-Cutting Concerns"
+            GEH[Global Exception Handler]
+            CACHE[Cache Manager]
+            VALID[Validation]
+        end
+
+        subgraph "Entity Layer"
+            PE[Project Entity]
+            TE[Task Entity]
+            DE[Developer Entity]
+            TAE[Task Assignment Entity]
+            ALE[Audit Log Entity]
+        end
+
+        subgraph "DTO Layer"
+            PDTO[Project DTOs]
+            TDTO[Task DTOs]
+            DDTO[Developer DTOs]
+            TADTO[Task Assignment DTOs]
+            ALDTO[Audit Log DTOs]
+        end
+    end
+
+    subgraph "Data Storage Layer"
+        PG[(PostgreSQL Database)]
+        MONGO[(MongoDB)]
+        REDIS[(Redis Cache)]
+    end
+
+    subgraph "External Configuration"
+        ENV[Environment Variables/.env]
+        PROPS[application.properties]
+    end
+
+    %% Client connections
+    CLIENT --> PC
+    CLIENT --> TC
+    CLIENT --> DC
+    CLIENT --> TAC
+    CLIENT --> ALC
+    SWAGGER --> PC
+    SWAGGER --> TC
+    SWAGGER --> DC
+    SWAGGER --> TAC
+    SWAGGER --> ALC
+
+    %% Controller to Service connections
+    PC --> PS
+    TC --> TS
+    DC --> DS
+    TAC --> TAS
+    ALC --> ALS
+
+    %% Service to Repository connections
+    PS --> PR
+    TS --> TR
+    DS --> DR
+    TAS --> TAR
+    ALS --> ALR
+
+    %% Repository to Entity connections
+    PR --> PE
+    TR --> TE
+    DR --> DE
+    TAR --> TAE
+    ALR --> ALE
+
+    %% Entity relationships
+    PE -.->|One-to-Many| TE
+    TE -.->|One-to-Many| TAE
+    DE -.->|One-to-Many| TAE
+    TE -.->|Many-to-One| PE
+    TAE -.->|Many-to-One| TE
+    TAE -.->|Many-to-One| DE
+
+    %% Cross-cutting concerns
+    GEH -.-> PC
+    GEH -.-> TC
+    GEH -.-> DC
+    GEH -.-> TAC
+    GEH -.-> ALC
+
+    VALID -.-> PC
+    VALID -.-> TC
+    VALID -.-> DC
+    VALID -.-> TAC
+
+    CACHE -.-> PS
+    CACHE -.-> REDIS
+
+    %% DTO connections
+    PC <--> PDTO
+    TC <--> TDTO
+    DC <--> DDTO
+    TAC <--> TADTO
+    ALC <--> ALDTO
+
+    %% Database connections
+    PR --> PG
+    TR --> PG
+    DR --> PG
+    TAR --> PG
+    ALR --> MONGO
+    PS --> REDIS
+
+    %% Audit logging
+    PS -.->|Logs Actions| ALS
+    TS -.->|Logs Actions| ALS
+    DS -.->|Logs Actions| ALS
+    TAS -.->|Logs Actions| ALS
+
+    %% Configuration
+    ENV -.-> PS
+    ENV -.-> TS
+    ENV -.-> DS
+    ENV -.-> TAS
+    ENV -.-> ALS
+    PROPS -.-> PS
+    PROPS -.-> TS
+    PROPS -.-> DS
+    PROPS -.-> TAS
+    PROPS -.-> ALS
+
+    %% Styling
+    classDef controller fill:#e1f5fe
+    classDef service fill:#f3e5f5
+    classDef repository fill:#e8f5e8
+    classDef entity fill:#fff3e0
+    classDef database fill:#ffebee
+    classDef cache fill:#f1f8e9
+    classDef config fill:#fafafa
+
+    class PC,TC,DC,TAC,ALC controller
+    class PS,TS,DS,TAS,ALS service
+    class PR,TR,DR,TAR,ALR repository
+    class PE,TE,DE,TAE,ALE entity
+    class PG,MONGO database
+    class REDIS cache
+    class ENV,PROPS config
