@@ -19,11 +19,9 @@ public class Developer {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long developerId;
 
-    @NotBlank
     @Size(min = 3, max = 50)
     private String name;
     @Email
-    @NotBlank
     private String email;
     private DevSkills skills;
 

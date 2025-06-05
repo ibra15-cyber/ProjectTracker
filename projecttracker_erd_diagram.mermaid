@@ -1,0 +1,74 @@
+erDiagram
+    %% PostgreSQL Entities
+    DEVELOPER {
+        Long developerId PK "Auto-generated Identity"
+        String name "Size: 3-50 chars"
+        String email "Email validation"
+        DevSkills skills "ENUM: FRONTEND, BACKEND, DEVOPS, QA"
+    }
+
+    PROJECT {
+        Long projectId PK "Auto-generated Identity"
+        String name "Size: 1-255 chars"
+        String description "Size: 1-255 chars"
+        LocalDateTime createdAt "Size: 1-255 chars"
+        LocalDateTime deadline "Future validation"
+        ProjectStatus status "ENUM: PLANNING, ACTIVE, ON_HOLD, COMPLETED, CANCELLED, ARCHIVED"
+    }
+
+    TASK {
+        Long taskId PK "Auto-generated Identity"
+        String title
+        String description
+        TaskStatus status "ENUM: TODO, IN_PROGRESS, UNDER_REVIEW, DONE, BLOCKED, CANCELLED"
+        LocalDateTime createdAt
+        LocalDateTime deadline
+        Long project_id FK "References Project.projectId"
+    }
+
+    TASK_ASSIGNMENT {
+        Long taskAssignmentId PK "Auto-generated Identity"
+        Long task_id FK "References Task.taskId"
+        Long developer_id FK "References Developer.developerId"
+        LocalDateTime assignedOn
+        TaskAssignmentStatus status "ENUM: ACTIVE, COMPLETED, REMOVED"
+        LocalDateTime deadline
+        LocalDateTime completedOn
+    }
+
+    %% MongoDB Entity (Audit Logs)
+    AUDIT_LOG {
+        String id PK "MongoDB ObjectId"
+        String action_type "Indexed: CREATE, UPDATE, DELETE, READ, LOGIN, LOGOUT"
+        String entity_type "Indexed: PROJECT, DEVELOPER, TASK, USER"
+        String entity_id "Indexed"
+        LocalDateTime timestamp "Indexed, JSON Format"
+        String actor_name "Indexed"
+        String payload "JSON string with change details"
+    }
+
+    %% Relationships
+    PROJECT ||--o{ TASK : "has many (CASCADE ALL, orphanRemoval)"
+    TASK ||--o{ TASK_ASSIGNMENT : "has many (CASCADE ALL, orphanRemoval)"
+    DEVELOPER ||--o{ TASK_ASSIGNMENT : "assigned to"
+    
+    %% Notes on relationships and constraints
+    PROJECT {
+        note "Serializable entity with cascade operations on tasks"
+    }
+    
+    TASK {
+        note "JsonIgnore on project and taskAssignments for circular reference prevention"
+    }
+    
+    DEVELOPER {
+        note "ToString excludes taskAssignments to prevent circular references"
+    }
+    
+    TASK_ASSIGNMENT {
+        note "Junction table with ToString.Exclude on task and developer"
+    }
+    
+    AUDIT_LOG {
+        note "MongoDB collection with indexed fields for performance - Factory methods for common operations"
+    }

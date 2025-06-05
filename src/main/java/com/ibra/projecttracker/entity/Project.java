@@ -25,21 +25,17 @@ public class Project implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectId;
 
-    @NotBlank
     @Size(min = 1, max = 255)
     private String name;
-    @NotBlank
+
     @Size(min = 1, max = 255)
     private String description;
 
-    @NotBlank
     @Size(min = 1, max = 255)
     private LocalDateTime createdAt;
 
-    @NotBlank
     @Future
     private LocalDateTime deadline;
-    @NotBlank
     private ProjectStatus status;
 
     @JsonIgnore
