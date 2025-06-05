@@ -121,7 +121,7 @@ public class ProjectServiceImpl implements ProjectService {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
 
         Pageable pageable = PageRequest.of(page, size, sort);
-
+        log.debug(pageable.toString());
         Page<Project> projectsPage =  projectRepository.findAll(pageable);
         projectsPage.forEach(System.out::println);
 
