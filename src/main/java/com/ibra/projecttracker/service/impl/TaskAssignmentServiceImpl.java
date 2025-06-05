@@ -1,6 +1,7 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
+import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.entity.TaskAssignment;
@@ -15,6 +16,7 @@ import com.ibra.projecttracker.service.TaskService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskAssignmentServiceImpl implements TaskAssignmentService {
@@ -44,13 +46,14 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                 .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
         taskAssignment.setTask(task);
 
-        Developer developer = developerRepository.findById(taskAssignmentDTO.getAssigneeId())
+        Developer developer = developerRepository.findById(taskAssignmentDTO.getDeveloperId())
                 .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
         taskAssignment.setDeveloper(developer);
 
         taskAssignment.setStatus(taskAssignmentDTO.getStatus());
         taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
-        taskAssignment.setCompletedOn(taskAssignmentDTO.getDueOn());
+        taskAssignment.setCompletedOn(taskAssignmentDTO.getCompletedOn());
+        taskAssignment.setDeadline(taskAssignmentDTO.getDeadline());
 
         return taskAssignmentRepository.save(taskAssignment);
     }
@@ -75,8 +78,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         TaskAssignment taskAssignmentToUpdate = taskAssignmentRepository.findById(assignTaskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskAssignment not found"));
 
-        if(taskAssignmentDTO.getAssigneeId() != null){
-            Developer developer = developerRepository.findById(taskAssignmentDTO.getAssigneeId())
+        if(taskAssignmentDTO.getDeveloperId() != null){
+            Developer developer = developerRepository.findById(taskAssignmentDTO.getDeveloperId())
                             .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
             taskAssignmentToUpdate.setDeveloper(developer);
         }
@@ -89,7 +92,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         if(taskAssignmentDTO.getStatus() != null) taskAssignmentToUpdate.setStatus(taskAssignmentDTO.getStatus());
         if(taskAssignmentDTO.getAssignedOn() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
-        if(taskAssignmentDTO.getDueOn() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
+        if(taskAssignmentDTO.getDeadline() != null) taskAssignmentToUpdate.setAssignedOn(taskAssignmentDTO.getAssignedOn());
 
         return taskAssignmentRepository.save(taskAssignmentToUpdate);
 
@@ -102,4 +105,15 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         taskAssignmentRepository.delete(taskAssignmentToDelete);
     }
+
+    @Override
+    public List<TaskAssignmentDTO> getAllTaskAssignmentByDeveloper(Long developerId) {
+        Developer developer = developerRepository.findById(developerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Developer not found"));
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByDeveloper(developer);
+        return taskAssignments.stream()
+                .map(entityDTOMapper::mapTaskAssignmentToDTO)
+                .collect(Collectors.toList());
+    }
+
 }

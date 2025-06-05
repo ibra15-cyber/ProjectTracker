@@ -1,10 +1,12 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.TaskDTO;
+import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
+import com.ibra.projecttracker.repository.DeveloperRepository;
 import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.service.TaskService;
@@ -21,12 +23,14 @@ public class TaskServiceImpl implements TaskService {
     private final EntityDTOMapper entityDTOMapper;
     private final ProjectRepository projectRepository;
     private final AuditLogService auditLogService;
+    private final DeveloperRepository developerRepository;
 
-    public TaskServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, AuditLogService auditLogService) {
+    public TaskServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, AuditLogService auditLogService, DeveloperRepository developerRepository) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.projectRepository = projectRepository;
         this.auditLogService = auditLogService;
+        this.developerRepository = developerRepository;
     }
 
     @Override
@@ -104,5 +108,14 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.delete(taskToDelete);
     }
 
+    @Override
+    public List<TaskDTO> getTasksByProjectId(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+        List<Task> tasks = taskRepository.findByProject(project);
+        return tasks.stream()
+                .map(entityDTOMapper::mapTaskToTaskDTO)
+                .collect(Collectors.toList());
+    }
 
 }

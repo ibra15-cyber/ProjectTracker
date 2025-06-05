@@ -1,7 +1,6 @@
 package com.ibra.projecttracker.entity;
 
 import com.ibra.projecttracker.enums.TaskAssignmentStatus;
-import com.ibra.projecttracker.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -30,7 +29,7 @@ public class TaskAssignment {
 
     private TaskAssignmentStatus status;
 
-    private LocalDateTime dueOn;
+    private LocalDateTime deadline;
 
     private LocalDateTime completedOn;
 

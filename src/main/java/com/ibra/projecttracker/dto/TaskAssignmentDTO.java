@@ -17,7 +17,7 @@ public class TaskAssignmentDTO {
 
 
     @Positive(message = "Assignee ID must be positive")
-    private Long assigneeId;
+    private Long developerId;
     private String developerName;
 
     private LocalDateTime assignedOn; // This will be set automatically in service
@@ -25,7 +25,7 @@ public class TaskAssignmentDTO {
     private TaskAssignmentStatus status;
 
     @Future(message = "Due date must be in the future")
-    private LocalDateTime dueOn;
+    private LocalDateTime deadline;
 
     private LocalDateTime completedOn;
 }

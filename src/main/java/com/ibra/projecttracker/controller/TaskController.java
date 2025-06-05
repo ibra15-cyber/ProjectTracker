@@ -1,5 +1,6 @@
 package com.ibra.projecttracker.controller;
 
+import com.ibra.projecttracker.dto.ProjectDTO;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.service.TaskService;
@@ -74,8 +75,15 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-
-
-
+    @GetMapping("/get-tasks-by-projectId/{projectId}")
+    public ResponseEntity<Response> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
+        List<TaskDTO> projectDTOS = taskService.getTasksByProjectId(projectId);
+        Response response = Response.builder()
+                .message("Tasks retrieved successful")
+                .statusCode(HttpStatus.OK.toString())
+                .tasks(projectDTOS)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
 }

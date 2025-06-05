@@ -2,6 +2,7 @@ package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
 import com.ibra.projecttracker.dto.Response;
+import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.TaskAssignment;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.service.TaskAssignmentService;
@@ -77,6 +78,17 @@ public class TaskAssignmentController {
         Response response = Response.builder()
                 .message("Task deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/get-tasks-by-developerId/{developerId}")
+    public ResponseEntity<Response> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
+        List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
+        Response response = Response.builder()
+                .message("Tasks retrieved successful")
+                .statusCode(HttpStatus.OK.toString())
+                .taskAssignments(taskAssignmentByDeveloper)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

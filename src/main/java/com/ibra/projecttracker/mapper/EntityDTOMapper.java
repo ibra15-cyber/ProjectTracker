@@ -64,11 +64,11 @@ public class EntityDTOMapper {
         dto.setTaskAssignmentId(taskAssignment.getTaskAssignmentId());
         dto.setTaskId(taskAssignment.getTask().getTaskId());
         dto.setTaskTitle(taskAssignment.getTask().getTitle());
-        dto.setAssigneeId(taskAssignment.getDeveloper().getDeveloperId());
+        dto.setDeveloperId(taskAssignment.getDeveloper().getDeveloperId());
         dto.setDeveloperName(taskAssignment.getDeveloper().getName());
         dto.setAssignedOn(taskAssignment.getAssignedOn());
         dto.setStatus(taskAssignment.getStatus());
-        dto.setDueOn(taskAssignment.getDueOn());
+        dto.setDeadline(taskAssignment.getDeadline());
         dto.setCompletedOn(taskAssignment.getCompletedOn());
 //        dto.setAssignedBy(taskAssignment.getAssignedBy());
 //        dto.setNotes(taskAssignment.getNotes());
