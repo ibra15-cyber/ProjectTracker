@@ -1,8 +1,6 @@
 package com.ibra.projecttracker.service;
 
-import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import org.springframework.data.domain.Page;
 

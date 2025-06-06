@@ -30,14 +30,12 @@ public class TaskServiceImpl implements TaskService {
     private final EntityDTOMapper entityDTOMapper;
     private final ProjectRepository projectRepository;
     private final AuditLogService auditLogService;
-    private final DeveloperRepository developerRepository;
 
-    public TaskServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, AuditLogService auditLogService, DeveloperRepository developerRepository) {
+    public TaskServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, AuditLogService auditLogService) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.projectRepository = projectRepository;
         this.auditLogService = auditLogService;
-        this.developerRepository = developerRepository;
     }
 
     @Override

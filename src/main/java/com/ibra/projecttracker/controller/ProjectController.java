@@ -20,11 +20,10 @@ import java.util.List;
 @RequestMapping("/api/project")
 public class ProjectController {
     private final ProjectService projectService;
-    private final ProjectRepository projectRepository;
 
-    public ProjectController(ProjectService projectService, ProjectRepository projectRepository) {
+    public ProjectController(ProjectService projectService) {
         this.projectService = projectService;
-        this.projectRepository = projectRepository;
+
     }
 
 

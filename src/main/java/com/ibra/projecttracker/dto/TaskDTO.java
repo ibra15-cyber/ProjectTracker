@@ -15,7 +15,6 @@ public class TaskDTO {
     @Size(min = 3, max = 150, message = "Title must be between 3 and 150 characters")
     private String title;
 
-    @NotBlank(message = "Description is required")
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
