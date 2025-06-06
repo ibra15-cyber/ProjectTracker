@@ -24,9 +24,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> , JpaSpecifica
             " t.status != com.ibra.projecttracker.enums.TaskStatus.DONE")
     List<Task> findOverdueTasks();
 
-    @Query("SELECT p.name, t.status, COUNT(t)" +
-            " FROM Project p JOIN p.tasks t" +
-            " GROUP BY p.name, t.status")
+    @Query(value = "SELECT status, COUNT(*) as count FROM tasks GROUP BY status",
+            nativeQuery = true)
     List<Object[]> findTaskCountsGroupedByStatusAndProject();
 
 }

@@ -28,5 +28,5 @@ public class TaskDTO {
     @Positive(message = "Project ID must be positive")
     private Long projectId;
 
-    private List<TaskAssignment> taskAssignments;
+    private List<TaskAssignmentDTO> taskAssignments;
 }

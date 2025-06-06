@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibra.projecttracker.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tasks")
+@ToString(exclude = {"taskAssignments"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -22,18 +22,14 @@ import java.util.stream.Collectors;
 public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     private final TaskRepository taskRepository;
     private final EntityDTOMapper entityDTOMapper;
-    private final ProjectRepository projectRepository;
     private final DeveloperRepository developerRepository;
-    private final TaskService taskService;
     private final TaskAssignmentRepository taskAssignmentRepository;
     private final AuditLogService auditLogService;
 
-    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, DeveloperRepository developerRepository, TaskService taskService, TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService) {
+    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, DeveloperRepository developerRepository,TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
-        this.projectRepository = projectRepository;
         this.developerRepository = developerRepository;
-        this.taskService = taskService;
         this.taskAssignmentRepository = taskAssignmentRepository;
         this.auditLogService = auditLogService;
     }

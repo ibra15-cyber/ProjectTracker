@@ -40,7 +40,6 @@ public class EntityDTOMapper {
         taskDTO.setCreatedAt(task.getCreatedAt());
         taskDTO.setDeadline(task.getDeadline());
         taskDTO.setProjectId(task.getProject().getProjectId());
-        taskDTO.setTaskAssignments(task.getTaskAssignments());
         return taskDTO;
     }
 
