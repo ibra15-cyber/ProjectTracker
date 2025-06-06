@@ -21,11 +21,9 @@ import java.util.List;
 @RequestMapping("/api/task")
 public class TaskController {
     private final TaskService taskService;
-    private final TaskRepository taskRepository;
 
-    public TaskController(TaskService taskService, TaskRepository taskRepository) {
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
-        this.taskRepository = taskRepository;
     }
 
 

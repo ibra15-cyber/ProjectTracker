@@ -71,8 +71,6 @@ public class EntityDTOMapper {
         dto.setStatus(taskAssignment.getStatus());
         dto.setDeadline(taskAssignment.getDeadline());
         dto.setCompletedOn(taskAssignment.getCompletedOn());
-//        dto.setAssignedBy(taskAssignment.getAssignedBy());
-//        dto.setNotes(taskAssignment.getNotes());
         return dto;
     }
 }

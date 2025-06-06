@@ -19,17 +19,12 @@ public class RedisConfig {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Configure ObjectMapper
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        // This is crucial: enable default typing to include type information in JSON
-        // This helps Jackson deserialize LinkedHashMap back to the correct DTO type
         om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
 
-        // Use Jackson2JsonRedisSerializer for values, passing the configured ObjectMapper in the constructor
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(om, Object.class);
 
-        // Use StringRedisSerializer for keys to ensure they are human-readable
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
 

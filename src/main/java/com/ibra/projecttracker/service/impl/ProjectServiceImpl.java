@@ -1,8 +1,6 @@
 package com.ibra.projecttracker.service.impl;
 
-import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
@@ -137,6 +135,18 @@ public class ProjectServiceImpl implements ProjectService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 Sort.by(Sort.Direction.DESC, sortBy));
 
+        Specification<Project> spec = getProjectSpecification(projectId, name, description, createdAt, deadline, status);
+
+        Page<Project> projectPages = projectRepository.findAll(spec, pageable);
+
+        log.debug("Executing dynamic filter with specification: {}", spec);
+
+        return projectPages.stream()
+                .map(entityDTOMapper::mapProjectToProjectDTO)
+                .collect(Collectors.toList());
+    }
+
+    private static Specification<Project> getProjectSpecification(Long projectId, String name, String description, LocalDateTime createdAt, LocalDateTime deadline, ProjectStatus status) {
         Specification<Project> spec = Specification.allOf();
         if (projectId != null) spec = spec.and(ProjectSpecification.hasProjectId(projectId));
         if (name != null) spec = spec.and(ProjectSpecification.hasProjectName(name));
@@ -146,17 +156,8 @@ public class ProjectServiceImpl implements ProjectService {
         spec = spec.and(ProjectSpecification.dueOnOrAfter(deadline));
         spec = spec.and(ProjectSpecification.dueOnOrBefore(deadline));
         if (createdAt != null && deadline != null) spec.and(ProjectSpecification.createdBetween(createdAt, deadline));
-
-        Page<Project> projectPages = projectRepository.findAll(spec, pageable);
-
-        log.debug("Executing dynamic filter with specification: {}", spec);
-
-//        projectPages.forEach(System.out::println);
-        return projectPages.stream()
-                .map(entityDTOMapper::mapProjectToProjectDTO)
-                .collect(Collectors.toList());
+        return spec;
     }
-
 
 
 }

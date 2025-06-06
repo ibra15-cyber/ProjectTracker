@@ -31,7 +31,6 @@ public class Project implements Serializable {
     @Size(min = 1, max = 255)
     private String description;
 
-    @Size(min = 1, max = 255)
     private LocalDateTime createdAt;
 
     @Future

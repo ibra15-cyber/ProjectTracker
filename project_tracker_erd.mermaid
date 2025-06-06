@@ -1,0 +1,54 @@
+erDiagram
+    Project ||--o{ Task : "has many"
+    Task ||--o{ TaskAssignment : "has many"
+    Developer ||--o{ TaskAssignment : "assigned to"
+    AuditLog }o--|| Project : "logs activities"
+    AuditLog }o--|| Task : "logs activities" 
+    AuditLog }o--|| Developer : "logs activities"
+    AuditLog }o--|| TaskAssignment : "logs activities"
+
+    Project {
+        Long projectId PK
+        String name
+        String description
+        LocalDateTime createdAt
+        LocalDateTime deadline
+        ProjectStatus status
+    }
+
+    Task {
+        Long taskId PK
+        String title
+        String description
+        TaskStatus status
+        LocalDateTime createdAt
+        LocalDateTime deadline
+        Long project_id FK
+    }
+
+    Developer {
+        Long developerId PK
+        String name
+        String email
+        DevSkills skills
+    }
+
+    TaskAssignment {
+        Long taskAssignmentId PK
+        Long task_id FK
+        Long developer_id FK
+        LocalDateTime assignedOn
+        TaskAssignmentStatus status
+        LocalDateTime deadline
+        LocalDateTime completedOn
+    }
+
+    AuditLog {
+        String id PK
+        String actionType
+        String entityType
+        String entityId
+        LocalDateTime timestamp
+        String actorName
+        String payload
+    }
