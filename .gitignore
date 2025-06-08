@@ -35,5 +35,17 @@ out/
 
 ### VS Code ###
 .vscode/
+
 .env
+.env.prod
+.env.dev
+
+application-base.properties
+application-dev.properties
+application-prod.properties
+
+docker-compose-dev.yml
+docker-compose-prod.yml
+docker-compose-base.yml
+
 
