@@ -42,6 +42,8 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
+
 
 }
 
