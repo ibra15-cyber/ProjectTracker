@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/task-assignment")
+@RequestMapping("/api/v1/task-assignment")
 public class TaskAssignmentController {
 
     private final TaskAssignmentService taskAssignmentService;

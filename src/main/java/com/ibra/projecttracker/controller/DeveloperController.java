@@ -20,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/developer")
+@RequestMapping("/api/v1/developer")
 public class DeveloperController {
     private final DeveloperService developerService;
     private final DeveloperRepository developerRepository;
