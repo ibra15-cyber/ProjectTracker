@@ -15,6 +15,7 @@ import com.ibra.projecttracker.service.TaskAssignmentService;
 import com.ibra.projecttracker.service.TaskService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,9 +48,9 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         taskAssignment.setDeveloper(developer);
 
         taskAssignment.setStatus(taskAssignmentDTO.getStatus());
-        taskAssignment.setAssignedOn(taskAssignmentDTO.getAssignedOn());
+        taskAssignment.setAssignedOn(LocalDateTime.now());
         taskAssignment.setCompletedOn(taskAssignmentDTO.getCompletedOn());
-        taskAssignment.setDeadline(taskAssignmentDTO.getDeadline());
+        taskAssignment.setDeadline(task.getDeadline()); //use task's deadline
 
         return taskAssignmentRepository.save(taskAssignment);
     }

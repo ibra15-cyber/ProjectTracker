@@ -1,4 +1,4 @@
-package com.ibra.projecttracker.utility;
+package com.ibra.projecttracker.utility.redis;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;

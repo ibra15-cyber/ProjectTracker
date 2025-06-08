@@ -31,7 +31,7 @@ public class TaskAssignmentController {
     public ResponseEntity<Response> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
         Response response = Response.builder()
-                .message("Task created successfully")
+                .message("Task assigned successfully")
                 .statusCode(String.valueOf(HttpStatus.CREATED))
                 .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(newTask))
                 .build();
@@ -43,7 +43,7 @@ public class TaskAssignmentController {
         List<TaskAssignment> assignTaskRequests = taskAssignmentService.getAllTaskAssignments();
         List<TaskAssignmentDTO> assignmentDTOS = assignTaskRequests.stream().map(entityDTOMapper::mapTaskAssignmentToDTO).collect(Collectors.toList());
         Response response = Response.builder()
-                .message("All tasks retrieved successfully")
+                .message("All assigned tasks retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .taskAssignments(assignmentDTOS)
                 .build();
@@ -54,7 +54,7 @@ public class TaskAssignmentController {
     public ResponseEntity<Response> getTaskById(@PathVariable("id") Long id) {
         TaskAssignment assignTaskRequest = taskAssignmentService.getTaskAssignmentById(id);
         Response response = Response.builder()
-                .message("Task retrieved successfully")
+                .message("Assigned task retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(assignTaskRequest))
                 .build();
@@ -65,7 +65,7 @@ public class TaskAssignmentController {
     public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @Valid  @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment updateTask = taskAssignmentService.updateTask(id, taskAssignmentDTO);
         Response response = Response.builder()
-                .message("Task updated successfully")
+                .message("Assigned task updated successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(updateTask))
                 .build();
@@ -76,7 +76,7 @@ public class TaskAssignmentController {
     public ResponseEntity<Response> deleteTask(@PathVariable("id") Long id) {
         taskAssignmentService.deleteTask(id);
         Response response = Response.builder()
-                .message("Task deleted successfully")
+                .message("Assigned task deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -86,7 +86,7 @@ public class TaskAssignmentController {
     public ResponseEntity<Response> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
         Response response = Response.builder()
-                .message("Tasks retrieved successful")
+                .message("assigned task retrieved successful")
                 .statusCode(HttpStatus.OK.toString())
                 .taskAssignments(taskAssignmentByDeveloper)
                 .build();
