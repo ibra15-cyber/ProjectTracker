@@ -33,5 +33,8 @@ public class TaskAssignment {
 
     private LocalDateTime completedOn;
 
+    @Column(name = "last_notified_at")
+    private LocalDateTime lastNotifiedAt;
+
 }
 

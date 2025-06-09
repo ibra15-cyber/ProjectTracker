@@ -1,6 +1,8 @@
 package com.ibra.projecttracker.utility.email;
 
 import com.ibra.projecttracker.entity.Task;
+import com.ibra.projecttracker.repository.TaskAssignmentRepository;
+import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.utility.event.TaskDueEvent;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -12,6 +14,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class EmailNotificationListener {
 
@@ -19,6 +23,9 @@ public class EmailNotificationListener {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private TaskAssignmentRepository taskAssignmentRepository;
 
     @EventListener
     @Async
@@ -42,6 +49,10 @@ public class EmailNotificationListener {
             logger.info("Due date notification sent successfully for task: {} to: {}",
                     event.getTaskAssignment().getTask().getTitle(),
                     event.getDeveloperEmail());
+
+            //update the notify at to eliminate redundancy
+            event.getTaskAssignment().setLastNotifiedAt(LocalDateTime.now());
+            taskAssignmentRepository.save(event.getTaskAssignment());
 
         } catch (Exception e) {
             logger.error("Failed to send due date notification for task: {} - Error: {}",

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -35,6 +36,21 @@ public class TaskSchedulingService {
     private TaskAssignmentRepository taskAssignmentRepository;
 
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+
+    @Scheduled(cron = "0 */5 * * * *") // Runs every 5 minutes
+    public void scanForDueTasks() {
+        List<TaskAssignment> futureTasks = taskAssignmentRepository
+                .findTaskAssignmentsWithFutureDueDates();
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+        LocalDateTime threshold = now.plusMinutes(10);
+
+        futureTasks.stream()
+                .filter(ta -> ta.getTask().getDeadline().isBefore(threshold))
+                .filter(ta -> ta.getLastNotifiedAt() == null ||  // Skip if already notified
+                        ta.getLastNotifiedAt().isBefore(ta.getTask().getDeadline()))
+                .forEach(this::publishTaskDueEvent); // Reuse event logic
+    }
 
     public void scheduleTaskDueNotification(TaskAssignment taskAssignment) {
         if (taskAssignment == null || taskAssignment.getTask() == null) {

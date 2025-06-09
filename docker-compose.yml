@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3232:3232"
+      - "3333:3232"
     depends_on:
       - postgresql
       - mongodb
@@ -14,14 +14,17 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/project_tracker_log
-#      SPRING_DATA_MONGODB_HOST: mongodb
-#      SPRING_DATA_MONGODB_PORT: 27018
-#      SPRING_DATA_MONGODB_DATABASE: project_tracker_logs
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      # Add other Spring Boot specific environment variables if needed, e.g., for Actuator, Dotenv
-      # SPRING_PROFILES_ACTIVE: docker # Example for activating a 'docker' profile
-      # DOTENV_LOCATION: .env # If you use spring-dotenv with a specific file
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 465
+      SPRING_MAIL_USERNAME: ${gmail_account}
+      SPRING_MAIL_PASSWORD: ${gmail_password}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SOCKETFACTORY_PORT: 465
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SOCKETFACTORY_CLASS: javax.net.ssl.SSLSocketFactory
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SOCKETFACTORY_FALLBACK: false
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: true
 
   postgresql:
     image: postgres:15-alpine

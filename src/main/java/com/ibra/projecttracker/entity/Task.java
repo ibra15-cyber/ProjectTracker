@@ -33,4 +33,5 @@ public class Task {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskAssignment> taskAssignments;
 
+
 }
