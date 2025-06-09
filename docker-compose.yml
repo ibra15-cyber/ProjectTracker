@@ -11,8 +11,8 @@ services:
       - redis
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/project_tracker # Use service name 'postgresql'
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_USERNAME: ${postgres_user}
+      SPRING_DATASOURCE_PASSWORD: ${postgres_password}
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/project_tracker_log
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
@@ -32,8 +32,8 @@ services:
       - "5433:5432"
     environment:
       POSTGRES_DB: project_tracker
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
     volumes:
       - postgresql_data:/var/lib/postgresql/data
 
