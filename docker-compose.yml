@@ -13,9 +13,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/project_tracker # Use service name 'postgresql'
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_DATA_MONGODB_HOST: mongodb
-      SPRING_DATA_MONGODB_PORT: 27017
-      SPRING_DATA_MONGODB_DATABASE: project_tracker_logs
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/project_tracker_log
+#      SPRING_DATA_MONGODB_HOST: mongodb
+#      SPRING_DATA_MONGODB_PORT: 27018
+#      SPRING_DATA_MONGODB_DATABASE: project_tracker_logs
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       # Add other Spring Boot specific environment variables if needed, e.g., for Actuator, Dotenv
