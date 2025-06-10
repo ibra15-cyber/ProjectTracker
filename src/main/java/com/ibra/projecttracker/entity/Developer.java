@@ -29,6 +29,6 @@ public class Developer {
     private Set<TaskAssignment> taskAssignments;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 }
