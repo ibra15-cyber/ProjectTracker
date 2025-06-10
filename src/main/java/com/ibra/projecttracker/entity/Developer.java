@@ -27,4 +27,8 @@ public class Developer {
 
     @OneToMany(mappedBy = "developer")
     private Set<TaskAssignment> taskAssignments;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
