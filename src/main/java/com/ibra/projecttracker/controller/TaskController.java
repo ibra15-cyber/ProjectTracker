@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/task")
+@RequestMapping("/api/v1/tasks")
 public class TaskController {
     private final TaskService taskService;
 
@@ -27,7 +27,7 @@ public class TaskController {
     }
 
 
-    @PostMapping("/create-task")
+    @PostMapping
     public ResponseEntity<Response> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO newTask = taskService.createTask(taskDTO);
         Response response = Response.builder()
@@ -38,7 +38,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<Response> getAllTasks() {
         List<TaskDTO> taskDTOs = taskService.getAllTasks();
         Response response = Response.builder()
@@ -81,7 +81,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/get-tasks-by-projectId/{projectId}")
+    @GetMapping("/by-projectId/{projectId}")
     public ResponseEntity<Response> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
         List<TaskDTO> projectDTOS = taskService.getTasksByProjectId(projectId);
         Response response = Response.builder()

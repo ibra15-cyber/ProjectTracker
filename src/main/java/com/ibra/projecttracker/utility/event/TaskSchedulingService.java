@@ -39,17 +39,22 @@ public class TaskSchedulingService {
 
     @Scheduled(cron = "0 */5 * * * *") // Runs every 5 minutes
     public void scanForDueTasks() {
-        List<TaskAssignment> futureTasks = taskAssignmentRepository
-                .findTaskAssignmentsWithFutureDueDates();
+        List<TaskAssignment> futureTasks = taskAssignmentRepository.findTaskAssignmentsWithFutureDueDates();
 
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
-        LocalDateTime threshold = now.plusMinutes(10);
+//        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+//        LocalDateTime threshold = now.plusMinutes(10);
+//        futureTasks.stream()
+//                .filter(ta -> ta.getTask().getDeadline().isBefore(threshold))
+//                .filter(ta -> ta.getLastNotifiedAt() == null ||  // Skip if already notified
+//                        ta.getLastNotifiedAt().isBefore(ta.getTask().getDeadline()))
+//                .forEach(this::publishTaskDueEvent); // Reuse event logic
 
         futureTasks.stream()
-                .filter(ta -> ta.getTask().getDeadline().isBefore(threshold))
-                .filter(ta -> ta.getLastNotifiedAt() == null ||  // Skip if already notified
-                        ta.getLastNotifiedAt().isBefore(ta.getTask().getDeadline()))
-                .forEach(this::publishTaskDueEvent); // Reuse event logic
+                .filter(ta -> ta.getTask().getDeadline().isBefore(
+                        LocalDateTime.now().plusMinutes(10) // Due in next 10 mins
+                ))
+                .filter(ta -> ta.getLastNotifiedAt() == null) // Only un-notified tasks
+                .forEach(this::publishTaskDueEvent);
     }
 
     public void scheduleTaskDueNotification(TaskAssignment taskAssignment) {
@@ -111,16 +116,12 @@ public class TaskSchedulingService {
         try {
             String developerEmail = taskAssignment.getDeveloper().getEmail();
 
-            eventPublisher.publishEvent(
-                    new TaskDueEvent(this, taskAssignment, developerEmail)
-            );
+            eventPublisher.publishEvent(new TaskDueEvent(this, taskAssignment, developerEmail));
 
-            logger.info("Published TaskDueEvent for task: {}",
-                    taskAssignment.getTask().getTitle());
+            logger.info("Published TaskDueEvent for task: {}", taskAssignment.getTask().getTitle());
 
         } catch (Exception e) {
-            logger.error("Failed to publish TaskDueEvent for task: {} - Error: {}",
-                    taskAssignment.getTask().getTitle(), e.getMessage(), e);
+            logger.error("Failed to publish TaskDueEvent for task: {} - Error: {}", taskAssignment.getTask().getTitle(), e.getMessage(), e);
         } finally {
             // Clean up completed task from scheduled tasks map
             scheduledTasks.remove(taskAssignment.getTask().getTaskId());

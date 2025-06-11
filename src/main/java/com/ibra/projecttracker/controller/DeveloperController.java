@@ -20,20 +20,16 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/developer")
+@RequestMapping("/api/v1/developers")
 public class DeveloperController {
     private final DeveloperService developerService;
-    private final DeveloperRepository developerRepository;
-    private final TaskService taskService;
 
-    public DeveloperController(DeveloperService developerService, DeveloperRepository developerRepository, TaskService taskService) {
+    public DeveloperController(DeveloperService developerService) {
         this.developerService = developerService;
-        this.developerRepository = developerRepository;
-        this.taskService = taskService;
     }
 
 
-    @PostMapping("/create-developer")
+    @PostMapping
     public ResponseEntity<Response> createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO newDeveloper = developerService.createDeveloper(developerDTO);
         Response response = Response.builder()
@@ -44,7 +40,7 @@ public class DeveloperController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<Response> getAllDevelopers() {
         List<DeveloperDTO> developerDTOs = developerService.getAllDevelopers();
         Response response = Response.builder()
@@ -111,7 +107,6 @@ public class DeveloperController {
                  .statusCode(String.valueOf(HttpStatus.OK))
                  .developers(developerDTOs)
                  .build();
-
          return ResponseEntity.status(HttpStatus.OK).body(response);
      }
 

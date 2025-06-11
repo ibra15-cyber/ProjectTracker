@@ -1,10 +1,8 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.dto.ProjectDTO;
 import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.enums.ProjectStatus;
-import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -17,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/project")
+@RequestMapping("/api/v1/projects")
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -27,7 +25,7 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/create-project")
+    @PostMapping
     public ResponseEntity<Response> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO newProject = projectService.createProject(projectDTO);
         Response response = Response.builder()
@@ -38,7 +36,7 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<Response> getAllProjects() {
         List<ProjectDTO> projectDTOs = projectService.getAllProjects();
         Response response = Response.builder()

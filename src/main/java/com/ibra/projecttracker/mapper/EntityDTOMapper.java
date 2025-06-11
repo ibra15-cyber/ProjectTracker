@@ -1,13 +1,7 @@
 package com.ibra.projecttracker.mapper;
 
-import com.ibra.projecttracker.dto.DeveloperDTO;
-import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.dto.TaskAssignmentDTO;
-import com.ibra.projecttracker.dto.TaskDTO;
-import com.ibra.projecttracker.entity.Developer;
-import com.ibra.projecttracker.entity.Project;
-import com.ibra.projecttracker.entity.Task;
-import com.ibra.projecttracker.entity.TaskAssignment;
+import com.ibra.projecttracker.dto.*;
+import com.ibra.projecttracker.entity.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,6 +48,21 @@ public class EntityDTOMapper {
         developerDTO.setSkill(developer.getSkills());
         return developerDTO;
     }
+
+    public UserDTO mapUserToUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserDTO(
+                user.getUserId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getUserRole()
+        );
+    }
+
 
     public TaskAssignmentDTO mapTaskAssignmentToDTO(TaskAssignment taskAssignment) {
         if (taskAssignment == null) {

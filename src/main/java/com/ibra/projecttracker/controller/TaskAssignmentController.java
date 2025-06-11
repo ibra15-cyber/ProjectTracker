@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/task-assignment")
+@RequestMapping("/api/v1/task-assignments")
 public class TaskAssignmentController {
 
     private final TaskAssignmentService taskAssignmentService;
@@ -27,7 +27,7 @@ public class TaskAssignmentController {
     }
 
 
-    @PostMapping("/create-task-assignment")
+    @PostMapping
     public ResponseEntity<Response> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
         Response response = Response.builder()
@@ -38,7 +38,7 @@ public class TaskAssignmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<Response> getAllTasks() {
         List<TaskAssignment> assignTaskRequests = taskAssignmentService.getAllTaskAssignments();
         List<TaskAssignmentDTO> assignmentDTOS = assignTaskRequests.stream().map(entityDTOMapper::mapTaskAssignmentToDTO).collect(Collectors.toList());
@@ -82,7 +82,7 @@ public class TaskAssignmentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/get-tasks-by-developerId/{developerId}")
+    @GetMapping("/by-developerId/{developerId}")
     public ResponseEntity<Response> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
         Response response = Response.builder()

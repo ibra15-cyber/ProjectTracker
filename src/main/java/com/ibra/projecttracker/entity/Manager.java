@@ -1,7 +1,9 @@
 package com.ibra.projecttracker.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name="managers")
 public class Manager {
@@ -10,6 +12,6 @@ public class Manager {
     private Long mangerId;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 }
