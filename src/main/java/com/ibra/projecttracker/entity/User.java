@@ -21,25 +21,25 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @NotBlank(message = "first name can't be blank")
-    @Size(max = 15)
+//    @NotBlank(message = "first name can't be blank")
+//    @Size(max = 15)
     private String firstName;
 
-    @NotBlank(message = "first name can't be blank")
-    @Size( max = 15)
+//    @NotBlank(message = "first name can't be blank")
+//    @Size( max = 15)
     private String lastName;
 
-    @NotBlank(message = "Phone number must be entered")
-    @Size(max = 10)
+//    @NotBlank(message = "Phone number must be entered")
+//    @Size(max = 10)
     private String phoneNumber;
 
-    @Column(unique = true)
-    @Email()
-    @NotBlank(message = "Email can not be blank")
+//    @Column(unique = true)
+//    @Email()
+//    @NotBlank(message = "Email can not be blank")
     private String email;
 
-    @NotBlank(message = "password can't be blank")
-    @Size(min = 6, max = 15)
+//    @NotBlank(message = "password can't be blank")
+//    @Size(min = 6, max = 100)
     private String password;
 
 

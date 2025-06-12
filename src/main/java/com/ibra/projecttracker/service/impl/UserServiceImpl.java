@@ -1,7 +1,6 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.AuthRequest;
-import com.ibra.projecttracker.dto.Response;
 import com.ibra.projecttracker.dto.UserCreateRequest;
 import com.ibra.projecttracker.dto.UserDTO;
 import com.ibra.projecttracker.entity.User;
@@ -21,10 +20,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final EntityDTOMapper entityDTOMapper;
     private final JwtUtils jwtUtils;
+    private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils) {
         this.passwordEncoder = passwordEncoder;
@@ -39,6 +38,7 @@ public class UserServiceImpl implements UserService {
                 .firstName(userCreateRequest.getFirstName())
                 .lastName(userCreateRequest.getLastName())
                 .email(userCreateRequest.getEmail())
+//                .password(userCreateRequest.getPassword())
                 .password(passwordEncoder.encode(userCreateRequest.getPassword()))
                 .phoneNumber(userCreateRequest.getPhoneNumber())
                 .userRole(userCreateRequest.getUserRole())
@@ -50,15 +50,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String loginUser(AuthRequest authRequest) {
+        log.info("Attempting to login user with email: {}", authRequest.email());
         User loginUser = userRepository.findByEmail(authRequest.email())
                 .orElseThrow(()-> new ResourceNotFoundException("User not found"));
 
+        log.info("Found email of the loginUser: {}", loginUser.getEmail());
         if(!passwordEncoder.matches(authRequest.password(), loginUser.getPassword())) {
             throw new InvalidCredentialException("Wrong password");
         }
 
         log.debug("loginUser: {}", loginUser);
-        return jwtUtils.generateToken(authRequest.password());
+
+        return jwtUtils.generateToken(authRequest.email());
     }
 
     @Override

@@ -18,22 +18,20 @@ public class JwtUtils {
 
     private  static  final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 60L  *24L * 6L;
 
-    @Value("${secreteJwtString}")
-    private String secreteJwtString;
+    @Value("${secretJwtString}")
+    private String secretJwtString;
 
-    //    @PostConstruct
     private SecretKey getKey(){
-        byte[] keyBytes = Decoders.BASE64.decode(secreteJwtString);
+        byte[] keyBytes = Decoders.BASE64.decode(secretJwtString);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    //method invocation or overriding
     public String generateToken(User user){
-        String username = user.getEmail();
-        return generateToken(username);
+        return generateToken(user.getEmail());
     }
 
     public String generateToken(String username){
+        System.out.println("Generating JWT for username: " + username);
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -55,7 +53,6 @@ public class JwtUtils {
                         .getPayload()
         );
     }
-
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);

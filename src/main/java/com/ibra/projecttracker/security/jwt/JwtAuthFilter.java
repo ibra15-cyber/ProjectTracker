@@ -20,7 +20,6 @@ import java.io.IOException;
 
 @Component
 @Slf4j
-//@RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
@@ -33,7 +32,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromRequest(request);
 
         if (token != null) {
@@ -42,7 +43,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if(StringUtils.hasText(username) && jwtUtils.isTokenValid(token, userDetails)){
                 log.info("VALID JWT FOR : {} ", username);
-
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -54,8 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        System.out.println("header........................" + token);
-        //StringUtils.hasText(token) superior to token != null because is the token != null and if there's a one white space
+        log.info("TOKEN HEADER : {}", token);
         if(StringUtils.hasText(token) && StringUtils.startsWithIgnoreCase(token, "Bearer")){
             return token.substring(7);
         }

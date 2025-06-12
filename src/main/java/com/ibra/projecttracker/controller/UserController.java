@@ -19,7 +19,6 @@ public class UserController {
         this.userService = userService;
     }
 
-
     @GetMapping
     public ResponseEntity<Response> getAllUsers() {
         List<UserDTO> userDTOS = userService.getAllUsers();

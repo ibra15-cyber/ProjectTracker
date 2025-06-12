@@ -6,6 +6,7 @@ import com.ibra.projecttracker.dto.UserCreateRequest;
 import com.ibra.projecttracker.dto.UserDTO;
 import com.ibra.projecttracker.service.UserService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -25,6 +27,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Response> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
+        log.debug(userCreateRequest.toString());
         UserDTO userDTO = userService.createUser(userCreateRequest);
         Response response = Response.builder()
                 .message("User created successfully")
