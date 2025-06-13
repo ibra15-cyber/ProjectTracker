@@ -3,6 +3,7 @@ package com.ibra.projecttracker.security.jwt;
 import com.ibra.projecttracker.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,31 +17,42 @@ import java.util.function.Function;
 @Component
 public class JwtUtils {
 
-    private  static  final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 60L  *24L * 6L;
+    private static final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 30L;
+    private int refreshExpirationMs;
 
     @Value("${secretJwtString}")
     private String secretJwtString;
 
-    private SecretKey getKey(){
+    private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretJwtString);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(User user){
+    public String generateToken(User user) {
         return generateToken(user.getEmail());
     }
 
-    public String generateToken(String username){
+    public String generateToken(String username) {
         System.out.println("Generating JWT for username: " + username);
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * EXPIRATION_TIME_IN_MILLISEC))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_IN_MILLISEC))
                 .signWith(getKey())
                 .compact();
     }
 
-    public String getUsernameFromToken(String token){
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
+                .signWith(getKey())
+                .compact();
+
+    }
+
+    public String getUsernameFromToken(String token) {
         return extractClaims(token, Claims::getSubject);
     }
 

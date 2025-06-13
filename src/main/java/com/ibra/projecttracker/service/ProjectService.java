@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface ProjectService {
     ProjectDTO createProject(ProjectDTO projectDTO);
@@ -18,4 +19,5 @@ public interface ProjectService {
                                            LocalDateTime createdAt, LocalDateTime deadline,
                                            ProjectStatus status, int pageSize, int pageNumber,
                                            String sortBy);
+    Map<String, String> getProjectSummary(Long projectId);
 }

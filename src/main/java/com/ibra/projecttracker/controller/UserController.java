@@ -1,7 +1,6 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.*;
-import com.ibra.projecttracker.service.TaskService;
 import com.ibra.projecttracker.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,10 +18,21 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> loggedInUser() {
+        UserDTO userDTO = userService.getLoginUser();
+        UserResponse response = UserResponse.builder()
+                .message("User retrieved successfully")
+                .statusCode(String.valueOf(HttpStatus.OK))
+                .user(userDTO)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping
-    public ResponseEntity<Response> getAllUsers() {
+    public ResponseEntity<UserResponse> getAllUsers() {
         List<UserDTO> userDTOS = userService.getAllUsers();
-        Response response = Response.builder()
+        UserResponse response = UserResponse.builder()
                 .message("All users retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .users(userDTOS)
@@ -30,10 +40,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+
+
+
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long id) {
         UserDTO userDTO = userService.getUserById(id);
-        Response response = Response.builder()
+        UserResponse response = UserResponse.builder()
                 .message("User retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .user(userDTO)
@@ -42,9 +55,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserDTO userDTO) {
         UserDTO updatedUserDTO = userService.updateUser(id, userDTO);
-        Response response = Response.builder()
+        UserResponse response = UserResponse.builder()
                 .message("User updated successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .user(updatedUserDTO)
@@ -53,9 +66,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<UserResponse> deleteTask(@PathVariable("id") Long id) {
         userService.deleteUser(id);
-        Response response = Response.builder()
+        UserResponse response = UserResponse.builder()
                 .message("User deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .build();

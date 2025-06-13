@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
-import com.ibra.projecttracker.dto.Response;
+import com.ibra.projecttracker.dto.TaskAssignmentResponse;
 import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.TaskAssignment;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
@@ -28,9 +28,9 @@ public class TaskAssignmentController {
 
 
     @PostMapping
-    public ResponseEntity<Response> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
+    public ResponseEntity<TaskAssignmentResponse> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
-        Response response = Response.builder()
+        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
                 .message("Task assigned successfully")
                 .statusCode(String.valueOf(HttpStatus.CREATED))
                 .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(newTask))
@@ -39,10 +39,10 @@ public class TaskAssignmentController {
     }
 
     @GetMapping
-    public ResponseEntity<Response> getAllTasks() {
+    public ResponseEntity<TaskAssignmentResponse> getAllTasks() {
         List<TaskAssignment> assignTaskRequests = taskAssignmentService.getAllTaskAssignments();
         List<TaskAssignmentDTO> assignmentDTOS = assignTaskRequests.stream().map(entityDTOMapper::mapTaskAssignmentToDTO).collect(Collectors.toList());
-        Response response = Response.builder()
+        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
                 .message("All assigned tasks retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .taskAssignments(assignmentDTOS)
@@ -51,9 +51,9 @@ public class TaskAssignmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getTaskById(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskAssignmentResponse> getTaskById(@PathVariable("id") Long id) {
         TaskAssignment assignTaskRequest = taskAssignmentService.getTaskAssignmentById(id);
-        Response response = Response.builder()
+        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
                 .message("Assigned task retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(assignTaskRequest))
@@ -62,9 +62,9 @@ public class TaskAssignmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @Valid  @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
+    public ResponseEntity<TaskAssignmentResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment updateTask = taskAssignmentService.updateTask(id, taskAssignmentDTO);
-        Response response = Response.builder()
+        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
                 .message("Assigned task updated successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(updateTask))
@@ -73,9 +73,9 @@ public class TaskAssignmentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskAssignmentResponse> deleteTask(@PathVariable("id") Long id) {
         taskAssignmentService.deleteTask(id);
-        Response response = Response.builder()
+        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
                 .message("Assigned task deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .build();
@@ -83,18 +83,15 @@ public class TaskAssignmentController {
     }
 
     @GetMapping("/by-developerId/{developerId}")
-    public ResponseEntity<Response> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
+    public ResponseEntity<TaskAssignmentResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
-        Response response = Response.builder()
+        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
                 .message("assigned task retrieved successful")
                 .statusCode(HttpStatus.OK.toString())
                 .taskAssignments(taskAssignmentByDeveloper)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
-
-
 
 
 }

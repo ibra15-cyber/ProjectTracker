@@ -46,6 +46,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
+    private String refreshedToken;
+
     @OneToOne(optional = true, mappedBy = "user")
     private Admin admin;
 

@@ -1,20 +1,14 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.dto.Response;
+import com.ibra.projecttracker.dto.TaskResponse;
 import com.ibra.projecttracker.dto.TaskDTO;
-import com.ibra.projecttracker.entity.Task;
-import com.ibra.projecttracker.enums.ProjectStatus;
-import com.ibra.projecttracker.enums.TaskStatus;
-import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -28,9 +22,9 @@ public class TaskController {
 
 
     @PostMapping
-    public ResponseEntity<Response> createTask(@Valid @RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO newTask = taskService.createTask(taskDTO);
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("Task created successfully")
                 .statusCode(String.valueOf(HttpStatus.CREATED))
                 .task(newTask)
@@ -38,10 +32,11 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public ResponseEntity<Response> getAllTasks() {
+    public ResponseEntity<TaskResponse> getAllTasks() {
         List<TaskDTO> taskDTOs = taskService.getAllTasks();
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("All tasks retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .tasks(taskDTOs)
@@ -50,9 +45,9 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getTaskById(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable("id") Long id) {
         TaskDTO taskDTO = taskService.getTaskById(id);
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("Task retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .task(taskDTO)
@@ -61,9 +56,9 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO updateTask = taskService.updateTask(id, taskDTO);
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("Task updated successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .task(updateTask)
@@ -72,9 +67,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskResponse> deleteTask(@PathVariable("id") Long id) {
         taskService.deleteTask(id);
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("Task deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .build();
@@ -82,9 +77,9 @@ public class TaskController {
     }
 
     @GetMapping("/by-projectId/{projectId}")
-    public ResponseEntity<Response> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
+    public ResponseEntity<TaskResponse> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
         List<TaskDTO> projectDTOS = taskService.getTasksByProjectId(projectId);
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("Tasks retrieved successful")
                 .statusCode(HttpStatus.OK.toString())
                 .tasks(projectDTOS)
@@ -94,12 +89,12 @@ public class TaskController {
 
 
     @GetMapping("/sort")
-    public ResponseEntity<Response> getAllTasks(
+    public ResponseEntity<TaskResponse> getAllTasks(
             @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
 
         List<TaskDTO> tasks = taskService.getAllTasksBySort(sortBy, sortDirection);
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("All tasks retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .tasks(tasks)
@@ -108,9 +103,9 @@ public class TaskController {
     }
 
     @GetMapping("/overdue")
-    public ResponseEntity<Response> getOverdueTasks() {
+    public ResponseEntity<TaskResponse> getOverdueTasks() {
         List<TaskDTO> taskDTOS = taskService.findOverdueTasks();
-        Response response = Response.builder()
+        TaskResponse response = TaskResponse.builder()
                 .message("Tasks retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .tasks(taskDTOS)
@@ -118,11 +113,10 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-     @GetMapping("/countsByStatus")
-     public List<Object[]> getTaskCountsByStatus() {
-           return     taskService.findTaskCountsGroupedByStatusAndProject();
-
-     }
+    @GetMapping("/countsByStatus")
+    public List<Object[]> getTaskCountsByStatus() {
+        return taskService.findTaskCountsGroupedByStatusAndProject();
+    }
 
 
 }

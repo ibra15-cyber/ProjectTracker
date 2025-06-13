@@ -9,11 +9,12 @@ import java.util.List;
 
 @Builder
 @Data
-public class TaskResponse {
+public class TaskAssignmentResponse {
     private String message;
     private String statusCode;
     private Long timestamp;
 
-    private TaskDTO task;
-    private List<TaskDTO> tasks;
+    private TaskAssignmentDTO taskAssignment;
+    private List<TaskAssignmentDTO> taskAssignments;
+
 }

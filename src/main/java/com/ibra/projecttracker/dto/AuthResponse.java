@@ -6,14 +6,21 @@ import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 @Builder
 @Data
-public class TaskResponse {
+public class AuthResponse {
     private String message;
     private String statusCode;
     private Long timestamp;
 
-    private TaskDTO task;
-    private List<TaskDTO> tasks;
+
+    private UserDTO user;
+    private String token;
+    private UserDTO userRole;
+
+    Map<String, String> loginResponse;
+
+    Map<String, String> tokenRefresh;
 }

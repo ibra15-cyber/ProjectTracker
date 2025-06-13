@@ -3,6 +3,7 @@ package com.ibra.projecttracker.service.impl;
 import com.ibra.projecttracker.dto.ProjectDTO;
 import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.enums.ProjectStatus;
+import com.ibra.projecttracker.enums.TaskStatus;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.ProjectRepository;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -146,6 +149,25 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Map<String, String> getProjectSummary(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (project.getTasks() == null || project.getTasks().isEmpty()) {
+            throw new ResourceNotFoundException("Project has no tasks to summarize");
+        }
+
+        Map<String, String> summary = new HashMap<>();
+        summary.put("Project ID", project.getProjectId().toString());
+        summary.put("Status", project.getStatus().toString());
+        summary.put("Deadline", project.getDeadline().toString());
+        summary.put("Number of Tasks", String.valueOf(project.getTasks().size()));
+        summary.put("Completed Tasks", String.valueOf(project.getTasks().stream().filter(task -> task.getStatus() == TaskStatus.DONE).count()));
+        auditLogService.logRead("PROJECT_SUMMARY", projectId.toString());
+        return summary;
+    }
+
     private static Specification<Project> getProjectSpecification(Long projectId, String name, String description, LocalDateTime createdAt, LocalDateTime deadline, ProjectStatus status) {
         Specification<Project> spec = Specification.allOf();
         if (projectId != null) spec = spec.and(ProjectSpecification.hasProjectId(projectId));
@@ -158,6 +180,8 @@ public class ProjectServiceImpl implements ProjectService {
         if (createdAt != null && deadline != null) spec.and(ProjectSpecification.createdBetween(createdAt, deadline));
         return spec;
     }
+
+
 
 
 }

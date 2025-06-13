@@ -1,6 +1,9 @@
 package com.ibra.projecttracker.security.jwt;
 
+import com.ibra.projecttracker.exception.ExpiredTokenException;
+import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.security.CustomUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,21 +39,33 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = getTokenFromRequest(request);
 
-        if (token != null) {
-            String username = jwtUtils.getUsernameFromToken(token);
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        try {
+            String token = getTokenFromRequest(request);
 
-            if(StringUtils.hasText(username) && jwtUtils.isTokenValid(token, userDetails)){
+            if (token != null) {
+                String username = jwtUtils.getUsernameFromToken(token);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+
+                if (!jwtUtils.isTokenValid(token, userDetails)) {
+                    throw new InvalidTokenException("JWT is invalid or expired");
+                }
+
                 log.info("VALID JWT FOR : {} ", username);
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
             }
+
+            filterChain.doFilter(request, response);
+        } catch (ExpiredJwtException ex) {
+            logger.error("JWT expired: {}");
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+        } catch (InvalidTokenException ex) {
+            logger.error("Invalid token: {}");
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
         }
-        filterChain.doFilter(request, response);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

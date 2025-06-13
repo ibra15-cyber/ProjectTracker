@@ -42,27 +42,29 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtUtils jwtUtils) throws  Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtUtils jwtUtils) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/v1/home","/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh-token", "/api/v1/auth/logout").permitAll()
+                                .requestMatchers("/api/v1/home", "/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh-token", "/api/v1/auth/logout").permitAll()
 //
-//                        .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").hasAuthority("CONTRACTOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/tasks/**").hasAuthority("CONTRACTOR")
-//                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").hasAuthority("CONTRACTOR")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/tasks/**").hasAuthority("CONTRACTOR")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+//\
+                                .requestMatchers("/api/v1/projects/**").hasAnyAuthority("MANAGER", "ADMIN")
 //
-//                        .requestMatchers("/api/v1/projects/**").hasAnyAuthority("MANAGER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/tasks").hasAnyAuthority("MANAGER", "ADMIN")
 //
-//                        .requestMatchers(HttpMethod.POST, "/api/v1/tasks").hasAnyAuthority("MANAGER", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/tasks/{id}").hasAnyAuthority( "ADMIN", "DEVELOPER")
 //
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/tasks/{id}").hasAnyAuthority("MANAGER", "ADMIN", "DEVELOPER")
+                                .requestMatchers("/api/v1/users/**").hasAuthority("ADMIN")
+                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                                .requestMatchers("/api/tasks/**").hasAuthority("ADMIN")
 //
-//                        .requestMatchers("/admin/**").hasAuthority("ADMIN") // General admin paths
-//
-//                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
 
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -79,7 +81,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

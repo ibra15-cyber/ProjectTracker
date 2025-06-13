@@ -136,6 +136,25 @@ public class AuditLog {
         return new AuditLog("LOGIN", "USER", actorName, actorName, payload);
     }
 
+    // Add these new static factory methods to your existing AuditLog class
+    public static AuditLog loginSuccessLog(String username) {
+        return new AuditLog("LOGIN_SUCCESS", "AUTH", username, username, "{}");
+    }
+
+    public static AuditLog loginFailedLog(String username, String reason) {
+        return new AuditLog("LOGIN_FAILED", "AUTH", username, "SYSTEM",
+                String.format("{\"reason\":\"%s\"}", reason));
+    }
+
+    public static AuditLog unauthorizedAccessLog(String path, String method, String username) {
+        return new AuditLog("UNAUTHORIZED_ACCESS", "AUTH", username, username,
+                String.format("{\"path\":\"%s\",\"method\":\"%s\"}", path, method));
+    }
+
+    public static AuditLog tokenRefreshLog(String username) {
+        return new AuditLog("TOKEN_REFRESH", "AUTH", username, username, "{}");
+    }
+
     public static AuditLog logoutLog(String actorName) {
         return new AuditLog("LOGOUT", "USER", actorName, actorName);
     }

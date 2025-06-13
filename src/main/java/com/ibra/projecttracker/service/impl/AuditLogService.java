@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibra.projecttracker.entity.AuditLog;
 import com.ibra.projecttracker.repository.AuditLogRepository;
+import com.ibra.projecttracker.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,8 +24,12 @@ public class AuditLogService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private UserService userService;
+
     public String getCurrentUser() {
-        return "SYSTEM";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+//        return "system";
     }
 
     public void saveAuditLog(AuditLog auditLog) {

@@ -1,10 +1,12 @@
 package com.ibra.projecttracker.security.openAuth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibra.projecttracker.entity.AuditLog;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
+import com.ibra.projecttracker.service.impl.AuditLogService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,11 +27,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private final JwtUtils jwtUtils;
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public OAuth2LoginSuccessHandler(JwtUtils jwtUtils, ObjectMapper objectMapper, UserRepository userRepository) {
+    public OAuth2LoginSuccessHandler(JwtUtils jwtUtils, ObjectMapper objectMapper, UserRepository userRepository, AuditLogService auditLogService) {
         this.jwtUtils = jwtUtils;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -59,9 +63,15 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found "));
+                .orElseThrow(() -> {
+                    auditLogService.saveAuditLog(AuditLog.loginFailedLog(email, "User not found"));
+                    return new ResourceNotFoundException("User not found ");
+                });
 
         String token = jwtUtils.generateToken(user);
+
+        auditLogService.saveAuditLog(AuditLog.loginSuccessLog(email));
+
 
 //        // For Postman testing - return JSON response
 //        response.setContentType("application/json");
@@ -89,8 +99,16 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
          jwtCookie.setHttpOnly(true);
          jwtCookie.setSecure(true);
          jwtCookie.setPath("/");
-         jwtCookie.setMaxAge(24 * 60 * 60); // 24 hours
+         jwtCookie.setMaxAge(60 * 30);
          response.addCookie(jwtCookie);
-         response.sendRedirect("/api/v1/home");
+
+        Cookie roleCookie = new Cookie("user_role", user.getUserRole().name());
+        roleCookie.setHttpOnly(false); // Allow JS to read
+        roleCookie.setSecure(true);
+        roleCookie.setPath("/");
+        roleCookie.setMaxAge(24 * 60 * 60); // Match JWT expiry
+        response.addCookie(roleCookie);
+
+        response.sendRedirect("/api/v1/home");
     }
 }

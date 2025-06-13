@@ -1,8 +1,10 @@
 package com.ibra.projecttracker.security.openAuth2;
 
+import com.ibra.projecttracker.entity.AuditLog;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.repository.UserRepository;
+import com.ibra.projecttracker.service.impl.AuditLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -16,9 +18,11 @@ import java.util.UUID;
 @Service
 public class StdOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public StdOAuth2UserService(UserRepository userRepository) {
+    public StdOAuth2UserService(UserRepository userRepository, AuditLogService auditLogService) {
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -39,6 +43,7 @@ public class StdOAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> createUser(oauth2User));
         log.info("User found or created: " + user);
+
         return oauth2User;
     }
 

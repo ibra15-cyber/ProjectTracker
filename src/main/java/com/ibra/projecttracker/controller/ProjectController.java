@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.dto.Response;
+import com.ibra.projecttracker.dto.ProjectResponse;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.service.ProjectService;
 import jakarta.validation.Valid;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -26,9 +27,9 @@ public class ProjectController {
 
 
     @PostMapping
-    public ResponseEntity<Response> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
+    public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO newProject = projectService.createProject(projectDTO);
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("Project created successfully")
                 .statusCode(String.valueOf(HttpStatus.CREATED))
                 .project(newProject)
@@ -37,9 +38,9 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<Response> getAllProjects() {
+    public ResponseEntity<ProjectResponse> getAllProjects() {
         List<ProjectDTO> projectDTOs = projectService.getAllProjects();
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("All projects retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .projects(projectDTOs)
@@ -48,20 +49,31 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getProjectById(@PathVariable("id") Long id) {
+    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable("id") Long id) {
         ProjectDTO projectDTO = projectService.getProjectById(id);
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("Project retrieved successfully")
                 .statusCode(HttpStatus.OK.toString())
                 .project(projectDTO)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+    
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<ProjectResponse> getProjectSummary(@PathVariable("id") Long id) {
+        Map<String, String> projectSummary = projectService.getProjectSummary(id);
+        ProjectResponse response = ProjectResponse.builder()
+                .message("Project summary retrieved successfully")
+                .statusCode(HttpStatus.OK.toString())
+                .projectSummary(projectSummary)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
+    public ResponseEntity<ProjectResponse> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO updateProject = projectService.updateProject(id, projectDTO);
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("Project updated successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .project(updateProject)
@@ -70,9 +82,9 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteProject(@PathVariable("id") Long id) {
+    public ResponseEntity<ProjectResponse> deleteProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("Project deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.toString())
                 .build();
@@ -80,14 +92,14 @@ public class ProjectController {
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<Response> getProjectPageable(
+    public ResponseEntity<ProjectResponse> getProjectPageable(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "projectId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
         Page<ProjectDTO> projectsPage = projectService.getProjectsPageable(page, size, sortBy, sortDirection);
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("All projects retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .projectPage(projectsPage)
@@ -96,7 +108,7 @@ public class ProjectController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Response> filterProject(@RequestParam(required = false) Long projectId,
+    public ResponseEntity<ProjectResponse> filterProject(@RequestParam(required = false) Long projectId,
                                                   @RequestParam(required = false) String name,
                                                   @RequestParam(required = false) String description,
                                                   @RequestParam(required = false)
@@ -113,7 +125,7 @@ public class ProjectController {
         List<ProjectDTO> projectDTOS = projectService.dynamicFilterProjects(projectId, name, description,
                 createdAt, deadline, status, pageSize, pageNumber, sortBy);
 
-        Response response = Response.builder()
+        ProjectResponse response = ProjectResponse.builder()
                 .message("Projects retrieved successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
                 .projects(projectDTOS)
@@ -121,6 +133,8 @@ public class ProjectController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+    
+    
 
 
 
