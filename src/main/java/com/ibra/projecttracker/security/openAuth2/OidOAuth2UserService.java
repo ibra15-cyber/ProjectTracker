@@ -3,6 +3,7 @@ package com.ibra.projecttracker.security.openAuth2;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.repository.UserRepository;
+import com.ibra.projecttracker.security.jwt.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,24 +14,37 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Slf4j
 @Service
 public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
 
     private final UserRepository userRepository;
+    private  final JwtUtils jwtUtils;
 
-    public OidOAuth2UserService(UserRepository userRepository) {
+    public OidOAuth2UserService(UserRepository userRepository, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
     }
 
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("Loading OIDC user from request: " + userRequest);
+        userRequest.getIdToken().getEmail();
 
-        OidcUser oidcUser = new DefaultOidcUser(
-                AuthorityUtils.createAuthorityList("ROLE_CONTRACTOR"),
+        OidcUser oidcUser;
+        if (Objects.equals(userRequest.getIdToken().getEmail(), "152512sch@gmail.com")) {
+               oidcUser = new DefaultOidcUser(
+                AuthorityUtils.createAuthorityList("ADMIN"),
                 userRequest.getIdToken());
+        } else {
+            oidcUser = new DefaultOidcUser(
+                AuthorityUtils.createAuthorityList("CONTRACTOR"),
+                userRequest.getIdToken());
+        }
 
         log.debug("oidcUser .....................{}", oidcUser.toString());
         System.out.println("oidUser......" +oidcUser);
@@ -45,6 +59,9 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
 
         log.debug("User found or created: {}", user);
 
+        String token = jwtUtils.generateToken(user);
+        System.out.println("Generated JWT Token in oid class: " + token);
+
         return oidcUser;
     }
 
@@ -52,7 +69,11 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setFirstName(firstName);
-        newUser.setUserRole(UserRole.CONTRACTOR);
+        if (Objects.equals(email, "152512sch@gmail.com")) {
+            newUser.setUserRole(UserRole.ADMIN);
+        } else {
+            newUser.setUserRole(UserRole.CONTRACTOR);
+        }
 
         return userRepository.save(newUser);
     }

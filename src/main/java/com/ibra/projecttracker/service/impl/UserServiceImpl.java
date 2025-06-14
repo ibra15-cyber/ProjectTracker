@@ -6,12 +6,12 @@ import com.ibra.projecttracker.dto.UserDTO;
 import com.ibra.projecttracker.entity.AuditLog;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.exception.InvalidCredentialException;
+import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
 import com.ibra.projecttracker.service.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,7 +47,6 @@ public class UserServiceImpl implements UserService {
                 .firstName(userCreateRequest.getFirstName())
                 .lastName(userCreateRequest.getLastName())
                 .email(userCreateRequest.getEmail())
-//                .password(userCreateRequest.getPassword())
                 .password(passwordEncoder.encode(userCreateRequest.getPassword()))
                 .phoneNumber(userCreateRequest.getPhoneNumber())
                 .userRole(userCreateRequest.getUserRole())
@@ -75,52 +73,62 @@ public class UserServiceImpl implements UserService {
         }
 
         log.debug("loginUser: {}", loginUser);
-
         String token = jwtUtils.generateToken(authRequest.email());
         String refreshToken = jwtUtils.generateRefreshToken(authRequest.email());
 
-        auditLogService.saveAuditLog(AuditLog.loginSuccessLog(authRequest.email()));
+        Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(token);
+        Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(refreshToken);
 
         loginUser.setRefreshedToken(refreshToken);
         userRepository.save(loginUser);
 
         return Map.of(
-                "Access token", token,
+                "accessToken", token,
                 "refreshToken", refreshToken,
+                "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
+                "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
                 "userRole", loginUser.getUserRole().name(),
                 "email", loginUser.getEmail()
-
         );
+
 
     }
 
 
     @Override
     public Map<String, String> refreshToken(HttpServletRequest request) {
-        String refreshToken = Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equals("refresh_token"))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(() -> new RuntimeException("Refresh token missing"));
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Refresh token must be provided in Authorization header with Bearer prefix");
+        }
+
+        String refreshToken = bearerToken.substring(7);
 
         String email = jwtUtils.getUsernameFromToken(refreshToken);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!refreshToken.equals(user.getRefreshedToken())) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new InvalidTokenException("Invalid refresh token");
         }
 
         String newAccessToken = jwtUtils.generateToken(user.getEmail());
-        String newRefreshToken = jwtUtils.generateRefreshToken(user.getRefreshedToken());
+        String newRefreshToken = jwtUtils.generateRefreshToken(user.getEmail());
+
+        Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(newAccessToken);
+        Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(newRefreshToken);
+
         user.setRefreshedToken(newRefreshToken);
         userRepository.save(user);
 
         return Map.of(
-                "Access token", newAccessToken,
-                "Refresh token", newRefreshToken,
-                "UserRole ", user.getUserRole().name()
+                "accessToken", newAccessToken,
+                "refreshToken", newRefreshToken,
+                "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
+                "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
+                "userRole", user.getUserRole().name()
         );
+
     }
 
     @Override

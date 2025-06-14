@@ -12,7 +12,7 @@ public class Contractor {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long contractorId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 }

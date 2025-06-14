@@ -1,6 +1,5 @@
 package com.ibra.projecttracker.security.jwt;
 
-import com.ibra.projecttracker.exception.ExpiredTokenException;
 import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.security.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -36,6 +35,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/v1/auth/login") ||
+                path.startsWith("/api/v1/auth/register") ||
+                path.startsWith("/api/v1/auth/refresh") ||
+                path.startsWith("/api/v1/auth/logout") ||
+                path.startsWith("/api/v1/home") ||
+                path.startsWith("/oauth2/authorization/") ||
+                path.startsWith("/oauth2/callback/") ||
+                path.startsWith("/login/oauth2/code/");
+    }
+
+    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -44,37 +56,56 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = getTokenFromRequest(request);
 
             if (token != null) {
-                String username = jwtUtils.getUsernameFromToken(token);
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                try {
+                    String username = jwtUtils.getUsernameFromToken(token);
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-                if (!jwtUtils.isTokenValid(token, userDetails)) {
-                    throw new InvalidTokenException("JWT is invalid or expired");
+                    if (!jwtUtils.isTokenValid(token, userDetails)) {
+                        SecurityContextHolder.clearContext();
+                        throw new InvalidTokenException("Invalid JWT token");
+                    }
+
+                    log.info("User {} successfully authenticated by JWT filter. Authorities: {}", username, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                } catch (ExpiredJwtException ex) {
+                    SecurityContextHolder.clearContext();
+                    // Corrected logging for logger.error(String, Throwable)
+                    logger.error("JWT expired: " + ex.getMessage(), ex);
+                    response.sendError(HttpStatus.UNAUTHORIZED.value(), "JWT expired: " + ex.getMessage());
+                    return;
+                } catch (InvalidTokenException ex) {
+                    SecurityContextHolder.clearContext();
+                    // Corrected logging for logger.error(String, Throwable)
+                    logger.error("Invalid token: " + ex.getMessage(), ex);
+                    response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid token: " + ex.getMessage());
+                    return;
+                } catch (Exception ex) {
+                    SecurityContextHolder.clearContext();
+                    // Corrected logging for logger.error(String, Throwable)
+                    logger.error("Error processing JWT token: " + ex.getMessage(), ex);
+                    response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authentication error: " + ex.getMessage());
+                    return;
                 }
-
-                log.info("VALID JWT FOR : {} ", username);
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
 
             filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException ex) {
-            logger.error("JWT expired: {}");
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
-        } catch (InvalidTokenException ex) {
-            logger.error("Invalid token: {}");
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+        } catch (Exception e) {
+            // Corrected logging for logger.error(String, Throwable)
+            logger.error("Error in JwtAuthFilter: " + e.getMessage(), e);
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error during authentication.");
         }
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         log.info("TOKEN HEADER : {}", token);
-        if(StringUtils.hasText(token) && StringUtils.startsWithIgnoreCase(token, "Bearer")){
+        if (StringUtils.hasText(token) && StringUtils.startsWithIgnoreCase(token, "Bearer")) {
+            log.info("JWT TOKEN : {}", token);
             return token.substring(7);
         }
         return null;
     }
 }
-

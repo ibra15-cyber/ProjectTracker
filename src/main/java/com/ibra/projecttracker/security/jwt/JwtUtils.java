@@ -6,22 +6,27 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Component
 public class JwtUtils {
 
-    private static final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 30L;
-    private int refreshExpirationMs;
+    private static final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 60L * 12L; // 12 hours
+    private static final Long refreshExpirationMs = 1000L * 60L * 60L * 24L; // 24 hours
 
     @Value("${secretJwtString}")
     private String secretJwtString;
+
+
 
     private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretJwtString);
@@ -74,4 +79,29 @@ public class JwtUtils {
     private boolean isTokenExpired(String token) {
         return extractClaims(token, Claims::getExpiration).before(new Date());
     }
+
+
+    public Map<String, Long> getTokenTimeDetails(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            Date issuedAt = claims.getIssuedAt();
+            Date expiration = claims.getExpiration();
+            long remainingTimeMs = expiration.getTime() - System.currentTimeMillis();
+            long totalDurationMs = expiration.getTime() - issuedAt.getTime();
+
+            return Map.of(
+                    "remainingTimeMs", remainingTimeMs,
+                    "totalDurationMs", totalDurationMs
+            );
+        } catch (Exception e) {
+            log.error("Error calculating token time details: {}", e.getMessage());
+            return Map.of();
+        }
+    }
+
 }

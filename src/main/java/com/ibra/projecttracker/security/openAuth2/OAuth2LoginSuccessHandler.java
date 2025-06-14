@@ -3,6 +3,7 @@ package com.ibra.projecttracker.security.openAuth2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibra.projecttracker.entity.AuditLog;
 import com.ibra.projecttracker.entity.User;
+import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -18,9 +20,9 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
+
+@Log4j2
 @Component
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -70,7 +72,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         String token = jwtUtils.generateToken(user);
 
+        log.info("OAuth2 Login Success: User '{}' (DB Role: {}) logged in. Spring Security Context Authorities: {}",
+                email, user.getUserRole().name(), authentication.getAuthorities());
+
+
         auditLogService.saveAuditLog(AuditLog.loginSuccessLog(email));
+
+
 
 
 //        // For Postman testing - return JSON response
@@ -96,7 +104,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
 //         Alternative: Set token as HTTP-only cookie for web applications
          Cookie jwtCookie = new Cookie("jwt", token);
-         jwtCookie.setHttpOnly(true);
+         jwtCookie.setHttpOnly(false);
          jwtCookie.setSecure(true);
          jwtCookie.setPath("/");
          jwtCookie.setMaxAge(60 * 30);
@@ -106,9 +114,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         roleCookie.setHttpOnly(false); // Allow JS to read
         roleCookie.setSecure(true);
         roleCookie.setPath("/");
-        roleCookie.setMaxAge(24 * 60 * 60); // Match JWT expiry
+        roleCookie.setMaxAge(30 * 60); // Match JWT expiry
         response.addCookie(roleCookie);
 
-        response.sendRedirect("/api/v1/home");
+        if (user.getUserRole() == UserRole.ADMIN) {
+            response.sendRedirect("/swagger-ui/index.html");
+        } else {
+            response.sendRedirect("/api/v1/home");
+        }
     }
 }

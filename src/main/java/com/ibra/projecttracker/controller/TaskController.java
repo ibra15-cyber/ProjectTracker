@@ -56,6 +56,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('DEVELOPER') and @securityUtils.isTaskOwner(#id))")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO updateTask = taskService.updateTask(id, taskDTO);
         TaskResponse response = TaskResponse.builder()

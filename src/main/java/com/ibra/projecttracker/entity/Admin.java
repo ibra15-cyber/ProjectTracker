@@ -11,7 +11,7 @@ public class Admin {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long adminId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="user_id")
     private User user;
 }

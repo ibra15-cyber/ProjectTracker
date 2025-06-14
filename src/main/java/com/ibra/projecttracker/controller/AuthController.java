@@ -30,14 +30,11 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
-    private final JwtUtils jwtUtils;
-    private final UserRepository userRepository;
 
-    public AuthController(UserService userService, JwtUtils jwtUtils, UserRepository userRepository) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.jwtUtils = jwtUtils;
-        this.userRepository = userRepository;
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
@@ -69,7 +66,7 @@ public class AuthController {
         AuthResponse response = AuthResponse.builder()
                 .message("Token refreshed successfully")
                 .statusCode(String.valueOf(HttpStatus.OK))
-                .tokenRefresh(tokenMap)
+                .loginResponse(tokenMap)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

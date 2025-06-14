@@ -15,10 +15,7 @@ public class AuthResponse {
     private String statusCode;
     private Long timestamp;
 
-
     private UserDTO user;
-    private String token;
-    private UserDTO userRole;
 
     Map<String, String> loginResponse;
 

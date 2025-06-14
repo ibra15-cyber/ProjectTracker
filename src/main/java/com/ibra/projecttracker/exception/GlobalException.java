@@ -67,16 +67,7 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    @ExceptionHandler({AccessDeniedException.class})
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        logger.warn("Access denied: {}", ex.getMessage());
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorMessage("Access denied: " + ex.getMessage())
-                .statusCode(String.valueOf(HttpStatus.FORBIDDEN.value()))
-                .timestamp(System.currentTimeMillis())
-                .build();
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-    }
+
 
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
     public ResponseEntity<ErrorResponse> handleAuthenticationException(Exception ex, WebRequest request) {
@@ -100,16 +91,6 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException ex, WebRequest request) {
-        logger.warn("Invalid token: {}", ex.getMessage());
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorMessage(ex.getMessage())
-                .statusCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
-                .timestamp(System.currentTimeMillis())
-                .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
 
 //    @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
 //    public ResponseEntity<ErrorResponse> handleAccessDeniedException(Exception ex, WebRequest request) {
@@ -135,6 +116,48 @@ public class GlobalException {
 //                .build();
 //        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
 //    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorMessage("Access denied: " + ex.getMessage())
+                .statusCode(String.valueOf(HttpStatus.FORBIDDEN.value()))
+                .timestamp(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException ex, WebRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorMessage("Invalid token: " + ex.getMessage())
+                .statusCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
+                .timestamp(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(ExpiredTokenException.class)
+    public ResponseEntity<ErrorResponse> handleExpiredTokenException(ExpiredTokenException ex, WebRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorMessage("Token expired: " + ex.getMessage())
+                .statusCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
+                .timestamp(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    // Catch-all handler for any other security-related exceptions
+    @ExceptionHandler({SecurityException.class})
+    public ResponseEntity<ErrorResponse> handleSecurityException(SecurityException ex, WebRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorMessage("Security error: " + ex.getMessage())
+                .statusCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
+                .timestamp(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllException(Exception ex, WebRequest request) {

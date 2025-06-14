@@ -5,6 +5,7 @@ import com.ibra.projecttracker.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> loggedInUser() {
         UserDTO userDTO = userService.getLoginUser();
         UserResponse response = UserResponse.builder()
@@ -39,8 +41,6 @@ public class UserController {
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
-
 
 
     @GetMapping("/{id}")
@@ -66,6 +66,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> deleteTask(@PathVariable("id") Long id) {
         userService.deleteUser(id);
         UserResponse response = UserResponse.builder()

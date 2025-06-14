@@ -19,8 +19,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
+// Duplicate imports removed for clarity
+// import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
+// import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+
 
 @Configuration
 @EnableWebSecurity
@@ -43,30 +49,34 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtUtils jwtUtils) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                .cors(withDefaults())
-                .authorizeHttpRequests(request -> request
-                                .requestMatchers("/api/v1/home", "/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh-token", "/api/v1/auth/logout").permitAll()
-//
-                                .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").hasAuthority("CONTRACTOR")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/tasks/**").hasAuthority("CONTRACTOR")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
-//\
-                                .requestMatchers("/api/v1/projects/**").hasAnyAuthority("MANAGER", "ADMIN")
-//
-                                .requestMatchers(HttpMethod.POST, "/api/v1/tasks").hasAnyAuthority("MANAGER", "ADMIN")
-//
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/tasks/{id}").hasAnyAuthority( "ADMIN", "DEVELOPER")
-//
-                                .requestMatchers("/api/v1/users/**").hasAuthority("ADMIN")
-                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                                .requestMatchers("/api/tasks/**").hasAuthority("ADMIN")
-//
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
-
-                                .anyRequest().authenticated()
+        httpSecurity
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            throw authException; // Or handle with a custom response
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            throw accessDeniedException; // Or handle with a custom response
+                        })
                 )
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(withDefaults())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/home", "/oauth2/callback/**", "/login/oauth2/code/**").permitAll()
+                        .requestMatchers("/admin/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/projects").hasAnyAuthority("MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/projects/**").hasAnyAuthority("MANAGER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tasks").hasAnyAuthority("MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/task-assignments").hasAnyAuthority("MANAGER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").hasAnyAuthority("MANAGER", "ADMIN", "DEVELOPER", "CONTRACTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tasks/**").hasAnyAuthority("MANAGER", "ADMIN", "DEVELOPER", "CONTRACTOR")
+                        .requestMatchers("/api/v1/users/**").hasAuthority("ADMIN")
+
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .oauth2Login(oauth2 -> oauth2
@@ -74,11 +84,25 @@ public class SecurityConfig {
                                 .userService(stdOAuth2UserService)
                                 .oidcUserService(oidOAuth2UserService)
                         ).successHandler(oauth2LoginSuccessHandler)
+                )
+
+                .headers(headers -> headers
+                        .frameOptions(configurer -> configurer.deny())
+                        .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                        "script-src 'self' 'unsafe-inline'; " +
+                                        "style-src 'self' 'unsafe-inline'; " +
+                                        "img-src 'self' data:; " +
+                                        "font-src 'self' https://cdn.scite.ai data: moz-extension:; " +
+                                        "frame-ancestors 'none'"
+                        ))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .permissionsPolicyHeader(permissions -> permissions.policy("camera=(), microphone=(), geolocation=()"))
                 );
 
         return httpSecurity.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -90,4 +114,3 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }
-

@@ -28,7 +28,8 @@ public class Developer {
     @OneToMany(mappedBy = "developer")
     private Set<TaskAssignment> taskAssignments;
 
-    @OneToOne
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 

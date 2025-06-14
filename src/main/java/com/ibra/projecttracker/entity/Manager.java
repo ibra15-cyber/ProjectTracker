@@ -11,7 +11,7 @@ public class Manager {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long mangerId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 }

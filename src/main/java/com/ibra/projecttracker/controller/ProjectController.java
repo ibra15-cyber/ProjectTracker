@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -60,6 +61,7 @@ public class ProjectController {
     }
     
     @GetMapping("/{id}/summary")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
     public ResponseEntity<ProjectResponse> getProjectSummary(@PathVariable("id") Long id) {
         Map<String, String> projectSummary = projectService.getProjectSummary(id);
         ProjectResponse response = ProjectResponse.builder()
