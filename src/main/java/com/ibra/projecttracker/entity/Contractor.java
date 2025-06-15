@@ -9,7 +9,6 @@ import lombok.Data;
 public class Contractor {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long contractorId;
 
     @OneToOne(cascade = CascadeType.ALL)

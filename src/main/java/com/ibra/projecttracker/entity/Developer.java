@@ -16,13 +16,13 @@ import java.util.Set;
 @ToString(exclude = {"taskAssignments"})
 public class Developer {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long developerId;
 
     @Size(min = 3, max = 50)
     private String name;
     @Email
     private String email;
+
     private DevSkills skills;
 
     @OneToMany(mappedBy = "developer")

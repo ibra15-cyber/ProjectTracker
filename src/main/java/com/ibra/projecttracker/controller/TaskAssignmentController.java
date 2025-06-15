@@ -9,10 +9,13 @@ import com.ibra.projecttracker.service.TaskAssignmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.security.authorization.AuthorityReactiveAuthorizationManager.hasAuthority;
 
 @RestController
 @RequestMapping("/api/v1/task-assignments")
@@ -39,6 +42,7 @@ public class TaskAssignmentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> getAllTasks() {
         List<TaskAssignment> assignTaskRequests = taskAssignmentService.getAllTaskAssignments();
         List<TaskAssignmentDTO> assignmentDTOS = assignTaskRequests.stream().map(entityDTOMapper::mapTaskAssignmentToDTO).collect(Collectors.toList());

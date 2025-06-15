@@ -3,13 +3,12 @@ package com.ibra.projecttracker.service.impl;
 import com.ibra.projecttracker.dto.AuthRequest;
 import com.ibra.projecttracker.dto.UserCreateRequest;
 import com.ibra.projecttracker.dto.UserDTO;
-import com.ibra.projecttracker.entity.AuditLog;
-import com.ibra.projecttracker.entity.User;
+import com.ibra.projecttracker.entity.*;
 import com.ibra.projecttracker.exception.InvalidCredentialException;
 import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
-import com.ibra.projecttracker.repository.UserRepository;
+import com.ibra.projecttracker.repository.*;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
 import com.ibra.projecttracker.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -32,13 +32,21 @@ public class UserServiceImpl implements UserService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private final DeveloperRepository developerRepository;
+    private final AdminRepository adminRepository;
+    private final ManagerRepository managerRepository;
+    private final ContractorRepository contractorRepository;
 
-    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils, AuditLogService auditLogService) {
+    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils, AuditLogService auditLogService, DeveloperRepository developerRepository, AdminRepository adminRepository, DeveloperRepository developerRepository1, AdminRepository adminRepository1, ManagerRepository managerRepository, ContractorRepository contractorRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.jwtUtils = jwtUtils;
         this.auditLogService = auditLogService;
+        this.developerRepository = developerRepository1;
+        this.adminRepository = adminRepository1;
+        this.managerRepository = managerRepository;
+        this.contractorRepository = contractorRepository;
     }
 
     @Override
@@ -53,6 +61,32 @@ public class UserServiceImpl implements UserService {
                 .build();
         //CAN I CONTROL AN ERROR MESSAGE
         User savedUser = userRepository.save(newUser);
+        if (savedUser.getUserRole().name().equals("DEVELOPER")) {
+            Developer developer = new Developer();
+            developer.setDeveloperId(savedUser.getUserId());
+            developer.setUser(savedUser);
+            developer.setName(userCreateRequest.getFirstName() + " " + userCreateRequest.getLastName());
+            developer.setEmail(userCreateRequest.getEmail());
+            developer.setSkills(userCreateRequest.getDevSkills());
+
+            developerRepository.save(developer);
+        } else if (savedUser.getUserRole().name().equals("ADMIN")) {
+            Admin admin = new Admin();
+            admin.setAdminId(savedUser.getUserId());
+            admin.setUser(savedUser);
+            adminRepository.save(admin);
+        } else if (savedUser.getUserRole().name().equals("MANAGER")) {
+            Manager manager = new Manager();
+            manager.setMangerId(savedUser.getUserId());
+            manager.setUser(savedUser);
+            managerRepository.save(manager);
+        } else {
+            Contractor contractor = new Contractor();
+            contractor.setContractorId(savedUser.getUserId());
+            contractor.setUser(savedUser);
+            contractorRepository.save(contractor);
+        }
+
         return entityDTOMapper.mapUserToUserDTO(savedUser);
     }
 

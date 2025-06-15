@@ -8,7 +8,6 @@ import lombok.Data;
 @Table(name="admins")
 public class Admin {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long adminId;
 
     @OneToOne(cascade = CascadeType.ALL)

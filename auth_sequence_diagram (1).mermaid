@@ -1,0 +1,85 @@
+sequenceDiagram
+    participant Client
+    participant JwtAuthFilter
+    participant SecurityConfig
+    participant CustomUserDetailsService
+    participant UserRepository
+    participant AuthUser
+    participant SecurityContext
+    participant Controller
+    participant SecurityUtils
+
+    Note over Client,SecurityUtils: JWT-Based Authentication Flow
+    
+    Client->>JwtAuthFilter: HTTP Request with Authorization Header
+    JwtAuthFilter->>JwtAuthFilter: Extract JWT from "Bearer" token
+    JwtAuthFilter->>JwtUtils: getUsernameFromToken(token)
+    JwtUtils-->>JwtAuthFilter: username (email)
+    
+    JwtAuthFilter->>CustomUserDetailsService: loadUserByUsername(email)
+    CustomUserDetailsService->>UserRepository: findByEmail(email)
+    UserRepository-->>CustomUserDetailsService: User entity
+    CustomUserDetailsService->>CustomUserDetailsService: Create GrantedAuthority with "ROLE_" + userRole
+    CustomUserDetailsService->>AuthUser: builder().user(user).build()
+    AuthUser-->>CustomUserDetailsService: UserDetails implementation
+    CustomUserDetailsService-->>JwtAuthFilter: UserDetails
+    
+    JwtAuthFilter->>JwtUtils: isTokenValid(token, userDetails)
+    JwtUtils-->>JwtAuthFilter: boolean
+    
+    alt Token is valid
+        JwtAuthFilter->>SecurityContext: Set Authentication with authorities
+        JwtAuthFilter->>Controller: Continue filter chain
+    else Token is invalid/expired
+        JwtAuthFilter->>Client: Return 401 Unauthorized
+    end
+
+    Note over Client,SecurityUtils: OAuth2 Authentication Flow
+    
+    Client->>SecurityConfig: GET /oauth2/authorization/google
+    SecurityConfig->>OidOAuth2UserService: loadUser(userRequest)
+    OidOAuth2UserService->>UserRepository: findByEmail(email)
+    
+    alt User exists
+        UserRepository-->>OidOAuth2UserService: Existing User
+    else User doesn't exist
+        OidOAuth2UserService->>OidOAuth2UserService: registerNewUser()
+        OidOAuth2UserService->>UserRepository: save(newUser)
+        UserRepository-->>OidOAuth2UserService: New User
+    end
+    
+    OidOAuth2UserService-->>SecurityConfig: OidcUser with authorities
+    SecurityConfig->>OAuth2LoginSuccessHandler: onAuthenticationSuccess()
+    OAuth2LoginSuccessHandler->>JwtUtils: generateToken(user)
+    JwtUtils-->>OAuth2LoginSuccessHandler: JWT token
+    OAuth2LoginSuccessHandler->>Client: Set JWT cookie + redirect
+
+    Note over Client,SecurityUtils: Authorization Check Flow
+    
+    Client->>Controller: API Request (authenticated)
+    Controller->>SecurityConfig: Check @PreAuthorize or path-based rules
+    SecurityConfig->>SecurityContext: Get current authentication
+    SecurityContext-->>SecurityConfig: Authentication with authorities
+    
+    alt Method-level security check
+        Controller->>SecurityUtils: isTaskOwner(taskId)
+        SecurityUtils->>SecurityContext: Get current user
+        SecurityUtils->>UserService: getLoginUser()
+        UserService-->>SecurityUtils: Current UserDTO
+        SecurityUtils->>TaskAssignmentService: getAllTaskAssignmentByDeveloper(userId)
+        TaskAssignmentService-->>SecurityUtils: List of assignments
+        SecurityUtils->>SecurityUtils: Check if task is assigned to user
+        SecurityUtils-->>Controller: boolean result
+    end
+    
+    alt Authorization successful
+        Controller->>Controller: Execute business logic
+        Controller-->>Client: Success response
+    else Authorization failed
+        Controller-->>Client: 403 Forbidden
+    end
+
+    Note over Client,SecurityUtils: Key Security Features
+    Note right of AuthUser: • Implements UserDetails<br/>• Uses email as username<br/>• Maps UserRole to GrantedAuthority
+    Note right of SecurityConfig: • Stateless JWT sessions<br/>• Role-based path restrictions<br/>• OAuth2 + JWT hybrid approach
+    Note right of SecurityUtils: • Custom authorization logic<br/>• Task ownership validation<br/>• Integration with business rules

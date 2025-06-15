@@ -1,5 +1,6 @@
 package com.ibra.projecttracker.dto;
 
+import com.ibra.projecttracker.enums.DevSkills;
 import com.ibra.projecttracker.enums.UserRole;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,4 +16,5 @@ public class UserCreateRequest {
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+    private DevSkills devSkills;
 }

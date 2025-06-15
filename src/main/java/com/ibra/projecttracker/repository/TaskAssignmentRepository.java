@@ -21,8 +21,7 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
         """, nativeQuery = true)
     List<TaskAssignment> findTaskAssignmentsWithFutureDueDates();
 
-
-
+    boolean existsByTaskAndDeveloper(Task task, Developer developer);
 
 }
 

@@ -33,9 +33,9 @@ public class User {
 //    @Size(max = 10)
     private String phoneNumber;
 
-//    @Column(unique = true)
-//    @Email()
-//    @NotBlank(message = "Email can not be blank")
+    @Column(unique = true)
+    @Email()
+    @NotBlank(message = "Email can not be blank")
     private String email;
 
 //    @NotBlank(message = "password can't be blank")

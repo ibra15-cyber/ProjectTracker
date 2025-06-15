@@ -26,9 +26,15 @@ public class SecurityUtils {
         if (auth == null) return false;
 
         UserDTO currentUser = userService.getLoginUser();
+
+        if (currentUser == null || currentUser.id() == null) {
+            return false;
+        }
+
+
         List<TaskAssignmentDTO> userAssignments =
             taskAssignmentService.getAllTaskAssignmentByDeveloper(currentUser.id());
-        
+
         return userAssignments.stream()
             .anyMatch(assignment -> assignment.getTaskId().equals(taskId));
     }

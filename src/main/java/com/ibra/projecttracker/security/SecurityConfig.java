@@ -71,6 +71,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/tasks").hasAnyAuthority("MANAGER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/task-assignments").hasAnyAuthority("MANAGER", "ADMIN")
 
+//                        .requestMatchers(HttpMethod.PUT, "/api/v1/tasks/{id}").hasAnyAuthority("ADMIN", "DEVELOPER")
+
                         .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").hasAnyAuthority("MANAGER", "ADMIN", "DEVELOPER", "CONTRACTOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/tasks/**").hasAnyAuthority("MANAGER", "ADMIN", "DEVELOPER", "CONTRACTOR")
                         .requestMatchers("/api/v1/users/**").hasAuthority("ADMIN")
