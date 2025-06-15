@@ -20,7 +20,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtils {
 
-    private static final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 60L * 12L; // 12 hours
+    private static final Long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 30;
     private static final Long refreshExpirationMs = 1000L * 60L * 60L * 24L; // 24 hours
 
     @Value("${secretJwtString}")
