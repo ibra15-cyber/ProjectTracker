@@ -52,7 +52,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> loginUser(@Valid @RequestBody AuthRequest authRequest) {
         Map<String, String> loginResponse = userService.loginUser(authRequest);
         AuthResponse response = AuthResponse.builder()
-                .message("User created successfully")
+                .message("User logged in successfully")
                 .statusCode(String.valueOf(HttpStatus.CREATED))
                 .loginResponse(loginResponse)
                 .build();

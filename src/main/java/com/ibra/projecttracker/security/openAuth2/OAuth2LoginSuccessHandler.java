@@ -54,7 +54,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             name = oidcUser.getFullName();
         } else if (authentication.getPrincipal() instanceof OAuth2User) {
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-            email = oauth2User.getAttribute("login");
+            email = oauth2User.getAttribute("login") + "@github.com";
             name = oauth2User.getAttribute("login");
         } else {
             email = name;
@@ -120,7 +120,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         if (user.getUserRole() == UserRole.ADMIN) {
             response.sendRedirect("/swagger-ui/index.html");
         } else {
-            response.sendRedirect("/api/v1/home");
+            response.sendRedirect("/api/v1/auth/oauth2/success");
         }
     }
 }

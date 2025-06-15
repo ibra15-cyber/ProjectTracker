@@ -1,7 +1,9 @@
 package com.ibra.projecttracker.security.openAuth2;
 
+import com.ibra.projecttracker.entity.Contractor;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.enums.UserRole;
+import com.ibra.projecttracker.repository.ContractorRepository;
 import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +25,12 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
 
     private final UserRepository userRepository;
     private  final JwtUtils jwtUtils;
+    private final ContractorRepository contractorRepository;
 
-    public OidOAuth2UserService(UserRepository userRepository, JwtUtils jwtUtils) {
+    public OidOAuth2UserService(UserRepository userRepository, JwtUtils jwtUtils, ContractorRepository contractorRepository) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
+        this.contractorRepository = contractorRepository;
     }
 
 
@@ -56,6 +60,7 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
 
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> registerNewUser(email, firstName));
+
 
         log.debug("User found or created: {}", user);
 

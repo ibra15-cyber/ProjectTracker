@@ -28,6 +28,7 @@ public class ProjectController {
 
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO newProject = projectService.createProject(projectDTO);
         ProjectResponse response = ProjectResponse.builder()
@@ -39,6 +40,7 @@ public class ProjectController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> getAllProjects() {
         List<ProjectDTO> projectDTOs = projectService.getAllProjects();
         ProjectResponse response = ProjectResponse.builder()
@@ -61,7 +63,7 @@ public class ProjectController {
     }
     
     @GetMapping("/{id}/summary")
-//    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
     public ResponseEntity<ProjectResponse> getProjectSummary(@PathVariable("id") Long id) {
         Map<String, String> projectSummary = projectService.getProjectSummary(id);
         ProjectResponse response = ProjectResponse.builder()
@@ -73,6 +75,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO updateProject = projectService.updateProject(id, projectDTO);
         ProjectResponse response = ProjectResponse.builder()
@@ -84,6 +87,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> deleteProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
         ProjectResponse response = ProjectResponse.builder()

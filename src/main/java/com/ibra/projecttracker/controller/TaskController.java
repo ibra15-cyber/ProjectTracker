@@ -22,6 +22,7 @@ public class TaskController {
 
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO newTask = taskService.createTask(taskDTO);
         TaskResponse response = TaskResponse.builder()
@@ -32,8 +33,8 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskResponse> getAllTasks() {
         List<TaskDTO> taskDTOs = taskService.getAllTasks();
         TaskResponse response = TaskResponse.builder()
@@ -45,6 +46,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER')")
     public ResponseEntity<TaskResponse> getTaskById(@PathVariable("id") Long id) {
         TaskDTO taskDTO = taskService.getTaskById(id);
         TaskResponse response = TaskResponse.builder()
@@ -56,7 +58,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or  (hasAnyAuthority('DEVELOPER') and securityUtils.isTaskOwner(#id))")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO updateTask = taskService.updateTask(id, taskDTO);
         TaskResponse response = TaskResponse.builder()
@@ -68,6 +70,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskResponse> deleteTask(@PathVariable("id") Long id) {
         taskService.deleteTask(id);
         TaskResponse response = TaskResponse.builder()

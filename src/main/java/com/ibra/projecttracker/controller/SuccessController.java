@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/home")
-public class HomeController {
+@RequestMapping("/api/v1/auth/oauth2/success")
+public class SuccessController {
 
     @GetMapping
-    public String home() {
+    public String success() {
         return "Welcome to Project Tracker API";
     }
 }

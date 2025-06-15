@@ -31,6 +31,7 @@ public class TaskAssignmentController {
 
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
         TaskAssignmentResponse response = TaskAssignmentResponse.builder()

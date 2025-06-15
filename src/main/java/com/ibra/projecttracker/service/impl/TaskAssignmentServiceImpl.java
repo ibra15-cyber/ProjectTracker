@@ -113,4 +113,9 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean isTaskAssignedToDeveloperUser(Long taskId, Long userId) {
+        return taskAssignmentRepository.existsByTaskAndDeveloperUserNative(taskId, userId); // For Native Query option
+    }
+
 }

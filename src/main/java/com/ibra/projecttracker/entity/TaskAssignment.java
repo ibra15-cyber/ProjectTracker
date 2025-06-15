@@ -11,30 +11,30 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="task_assignments")
 public class TaskAssignment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long taskAssignmentId;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long taskAssignmentId;
 
-    @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "taskId")
-    @ToString.Exclude
-    private Task task;
+        @ManyToOne
+        @JoinColumn(name = "task_id", referencedColumnName = "taskId")
+        @ToString.Exclude
+        private Task task;
 
-    @ManyToOne
-    @JoinColumn(name = "developer_id")
-    @ToString.Exclude
-    private Developer developer;
+        @ManyToOne
+        @JoinColumn(name = "developer_id")
+        @ToString.Exclude
+        private Developer developer;
 
-    private LocalDateTime assignedOn;
+        private LocalDateTime assignedOn;
 
-    private TaskAssignmentStatus status;
+        private TaskAssignmentStatus status;
 
-    private LocalDateTime deadline;
+        private LocalDateTime deadline;
 
-    private LocalDateTime completedOn;
+        private LocalDateTime completedOn;
 
-    @Column(name = "last_notified_at")
-    private LocalDateTime lastNotifiedAt;
+        @Column(name = "last_notified_at")
+        private LocalDateTime lastNotifiedAt;
 
 }
 

@@ -1,8 +1,10 @@
 package com.ibra.projecttracker.security.openAuth2;
 
 import com.ibra.projecttracker.entity.AuditLog;
+import com.ibra.projecttracker.entity.Contractor;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.enums.UserRole;
+import com.ibra.projecttracker.repository.ContractorRepository;
 import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.service.impl.AuditLogService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +21,12 @@ import java.util.UUID;
 public class StdOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
+    private final ContractorRepository contractorRepository;
 
-    public StdOAuth2UserService(UserRepository userRepository, AuditLogService auditLogService) {
+    public StdOAuth2UserService(UserRepository userRepository, AuditLogService auditLogService, ContractorRepository contractorRepository) {
         this.userRepository = userRepository;
         this.auditLogService = auditLogService;
+        this.contractorRepository = contractorRepository;
     }
 
     @Override
@@ -44,12 +48,13 @@ public class StdOAuth2UserService extends DefaultOAuth2UserService {
                 .orElseGet(() -> createUser(oauth2User));
         log.info("User found or created: " + user);
 
+
         return oauth2User;
     }
 
     private User createUser(OAuth2User oauth2User) {
         User user = new User();
-        user.setEmail(oauth2User.getAttribute("login"));
+        user.setEmail(oauth2User.getAttribute("login") + "@github.com");
         user.setFirstName(oauth2User.getAttribute("login"));
         user.setUserRole(UserRole.CONTRACTOR);
 
