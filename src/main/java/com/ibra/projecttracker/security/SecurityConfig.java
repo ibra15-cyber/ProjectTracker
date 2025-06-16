@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -70,7 +71,8 @@ public class SecurityConfig {
                                 "img-src 'self' data:; " +             // ADDED: Allows data: URIs for images
                                 "font-src 'self' https://cdn.scite.ai data: moz-extension:; " + "frame-ancestors 'none'"))
                         // Referrer Policy
-                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)).permissionsPolicy(permissions -> permissions.policy("camera=(), microphone=(), geolocation=()")));
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .permissionsPolicy(permissions -> permissions.policy("camera=(), microphone=(), geolocation=()")));
 
         return httpSecurity.build();
     }
@@ -92,4 +94,5 @@ public class SecurityConfig {
         expressionHandler.setApplicationContext(applicationContext);
         return expressionHandler;
     }
+
 }

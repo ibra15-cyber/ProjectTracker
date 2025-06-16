@@ -104,14 +104,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
 //         Alternative: Set token as HTTP-only cookie for web applications
          Cookie jwtCookie = new Cookie("jwt", token);
-         jwtCookie.setHttpOnly(false);
+         jwtCookie.setHttpOnly(true);
          jwtCookie.setSecure(true);
          jwtCookie.setPath("/");
          jwtCookie.setMaxAge(60 * 30);
          response.addCookie(jwtCookie);
 
         Cookie roleCookie = new Cookie("user_role", user.getUserRole().name());
-        roleCookie.setHttpOnly(false); // Allow JS to read
+        roleCookie.setHttpOnly(true); // Allow JS to read
         roleCookie.setSecure(true);
         roleCookie.setPath("/");
         roleCookie.setMaxAge(30 * 60); // Match JWT expiry

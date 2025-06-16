@@ -9,10 +9,14 @@ import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.*;
+import com.ibra.projecttracker.security.AuthUser;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
 import com.ibra.projecttracker.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,8 +40,9 @@ public class UserServiceImpl implements UserService {
     private final AdminRepository adminRepository;
     private final ManagerRepository managerRepository;
     private final ContractorRepository contractorRepository;
+    private final AuthenticationManager authenticationManager;
 
-    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils, AuditLogService auditLogService, DeveloperRepository developerRepository, AdminRepository adminRepository, DeveloperRepository developerRepository1, AdminRepository adminRepository1, ManagerRepository managerRepository, ContractorRepository contractorRepository) {
+    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils, AuditLogService auditLogService, DeveloperRepository developerRepository, AdminRepository adminRepository, DeveloperRepository developerRepository1, AdminRepository adminRepository1, ManagerRepository managerRepository, ContractorRepository contractorRepository, AuthenticationManager authenticationManager) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.entityDTOMapper = entityDTOMapper;
@@ -47,6 +52,7 @@ public class UserServiceImpl implements UserService {
         this.adminRepository = adminRepository1;
         this.managerRepository = managerRepository;
         this.contractorRepository = contractorRepository;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -93,41 +99,56 @@ public class UserServiceImpl implements UserService {
     @Override
     public Map<String, String> loginUser(AuthRequest authRequest) {
         log.info("Attempting to login user with email: {}", authRequest.email());
-        User loginUser = userRepository.findByEmail(authRequest.email())
-                .orElseThrow(() -> {
-                    auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "User not found"));
-                    return new ResourceNotFoundException("User not found");
-                });
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password())
+            );
 
-        log.info("Found email of the loginUser: {}", loginUser.getEmail());
+            User loginUser;
+            if (authentication.getPrincipal() instanceof AuthUser) {
+                AuthUser authUser = (AuthUser) authentication.getPrincipal();
+                loginUser = authUser.getUser();
+            } else {
+                // Fallback: get user by email if principal is not AuthUser
+                loginUser = userRepository.findByEmail(authRequest.email())
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            }
 
-        if (!passwordEncoder.matches(authRequest.password(), loginUser.getPassword())) {
+            log.info("Authentication successful for user: {}", loginUser.getEmail());
+
+            // Generate JWT token and refresh token
+            String token = jwtUtils.generateToken(authRequest.email());
+            String refreshToken = jwtUtils.generateRefreshToken(authRequest.email());
+
+            Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(token);
+            Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(refreshToken);
+
+            loginUser.setRefreshedToken(refreshToken);
+            userRepository.save(loginUser); // Save the refresh token to the user
+
+            return Map.of(
+                    "accessToken", token,
+                    "refreshToken", refreshToken,
+                    "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
+                    "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
+                    "userRole", loginUser.getUserRole().name(),
+                    "email", loginUser.getEmail()
+            );
+
+        } catch (UsernameNotFoundException e) {
+            log.warn("Login failed: User not found for email: {}", authRequest.email());
+            auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "User not found"));
+            throw new ResourceNotFoundException("User not found or invalid credentials."); // Or re-throw UsernameNotFoundException if preferred
+        } catch (BadCredentialsException e) {
+            log.warn("Login failed: Invalid password for email: {}", authRequest.email());
             auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "Invalid password"));
-            throw new InvalidCredentialException("Wrong password");
+            throw new InvalidCredentialException("Wrong password or invalid credentials.");
+        } catch (Exception e) {
+            log.error("An unexpected error occurred during login for email {}: {}", authRequest.email(), e.getMessage());
+            auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "Internal server error during authentication"));
+            throw new RuntimeException("An unexpected error occurred during login.", e);
         }
-
-        log.debug("loginUser: {}", loginUser);
-        String token = jwtUtils.generateToken(authRequest.email());
-        String refreshToken = jwtUtils.generateRefreshToken(authRequest.email());
-
-        Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(token);
-        Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(refreshToken);
-
-        loginUser.setRefreshedToken(refreshToken);
-        userRepository.save(loginUser);
-
-        return Map.of(
-                "accessToken", token,
-                "refreshToken", refreshToken,
-                "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
-                "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
-                "userRole", loginUser.getUserRole().name(),
-                "email", loginUser.getEmail()
-        );
-
-
     }
-
 
     @Override
     public Map<String, String> refreshToken(HttpServletRequest request) {
@@ -162,7 +183,6 @@ public class UserServiceImpl implements UserService {
                 "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
                 "userRole", user.getUserRole().name()
         );
-
     }
 
     @Override

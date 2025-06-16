@@ -29,12 +29,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
-        List<GrantedAuthority> grantedAuthorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()));
+        List<GrantedAuthority> grantedAuthorities = Collections.singletonList(new SimpleGrantedAuthority(user.getUserRole().name()));
 
-        // --- ADD THIS LINE BELOW ---
         log.info("CustomUserDetailsService: Loading user '{}'. Role from DB: {}. Granted Authorities: {}",
                 username, user.getUserRole().name(), grantedAuthorities);
-        // ---------------------------
 
         return AuthUser.builder()
                 .user(user)
