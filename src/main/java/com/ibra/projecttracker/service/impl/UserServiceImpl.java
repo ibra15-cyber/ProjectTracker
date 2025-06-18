@@ -103,36 +103,27 @@ public class UserServiceImpl implements UserService {
                     new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password())
             );
 
-            User loginUser;
-            if (authentication.getPrincipal() instanceof AuthUser) {
-                AuthUser authUser = (AuthUser) authentication.getPrincipal();
-                loginUser = authUser.getUser();
-                log.info("Authentication successful for user: {}", loginUser.getEmail());
-            } else {
-                loginUser = userRepository.findByEmail(authRequest.email())
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-                log.info("Authentication user found in db: {}", loginUser.getEmail());
-            }
-
-            log.info("Authentication successful for user: {}", loginUser.getEmail());
+            AuthUser authUser = (AuthUser) authentication.getPrincipal();
+            User user = authUser.getUser();
+            log.info("Authentication successful for user: {}", user.getEmail());
 
             // Generate JWT token and refresh token
-            String token = jwtUtils.generateToken(loginUser.getEmail());
+            String token = jwtUtils.generateToken(user.getEmail());
             String refreshToken = jwtUtils.generateRefreshToken(authRequest.email());
 
             Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(token);
             Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(refreshToken);
 
-            loginUser.setRefreshedToken(refreshToken);
-            userRepository.save(loginUser); // Save the refresh token to the user
+            user.setRefreshedToken(refreshToken);
+            userRepository.save(user); // Save the refresh token to the user
 
             return Map.of(
                     "accessToken", token,
                     "refreshToken", refreshToken,
                     "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
                     "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
-                    "userRole", loginUser.getUserRole().name(),
-                    "email", loginUser.getEmail()
+                    "userRole", user.getUserRole().name(),
+                    "email", user.getEmail()
             );
 
         } catch (UsernameNotFoundException e) {
