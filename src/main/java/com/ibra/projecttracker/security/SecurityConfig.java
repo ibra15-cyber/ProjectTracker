@@ -39,14 +39,17 @@ public class SecurityConfig {
     private final OidOAuth2UserService oidOAuth2UserService;
     private final OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
     private final ApplicationContext applicationContext; // <--- INJECT APPLICATION CONTEXT
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, StdOAuth2UserService stdOAuth2UserService, OidOAuth2UserService oidOAuth2UserService, OAuth2LoginSuccessHandler oauth2LoginSuccessHandler, ApplicationContext applicationContext) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, StdOAuth2UserService stdOAuth2UserService, OidOAuth2UserService oidOAuth2UserService, OAuth2LoginSuccessHandler oauth2LoginSuccessHandler, ApplicationContext applicationContext, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.stdOAuth2UserService = stdOAuth2UserService;
         this.oidOAuth2UserService = oidOAuth2UserService;
         this.oauth2LoginSuccessHandler = oauth2LoginSuccessHandler;
         this.applicationContext = applicationContext;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
 
@@ -54,12 +57,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtUtils jwtUtils) throws Exception {
         httpSecurity
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint(new ObjectMapper()))
-                        .accessDeniedHandler(new CustomAccessDeniedHandler(new ObjectMapper())))
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler))
                 .csrf(AbstractHttpConfigurer::disable).cors(withDefaults()).authorizeHttpRequests(request ->
                         request.requestMatchers("/api/v1/auth/oauth2/success", "/api/v1/auth/login", "/api/v1/auth/register",
                                         "/api/v1/auth/refresh", "/api/v1/auth/logout", "/oauth2/authorization/**", "/oauth2/callback/**", "/login/oauth2/code/**").permitAll().requestMatchers("/api/v1/projects/**", "/api/v1/tasks/**", "/api/v1/users/**", "api/v1/task-assignments/**").authenticated().requestMatchers("/api/v1/tasks/**").authenticated().requestMatchers("/admin/**").hasAuthority("ADMIN").requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
                                 .anyRequest().authenticated())
+
 //                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
