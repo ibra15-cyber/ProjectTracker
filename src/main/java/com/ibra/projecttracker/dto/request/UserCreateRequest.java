@@ -1,4 +1,4 @@
-package com.ibra.projecttracker.dto;
+package com.ibra.projecttracker.dto.request;
 
 import com.ibra.projecttracker.enums.DevSkills;
 import com.ibra.projecttracker.enums.UserRole;

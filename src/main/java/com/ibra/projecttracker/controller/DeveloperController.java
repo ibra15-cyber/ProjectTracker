@@ -1,17 +1,11 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.DeveloperResponse;
+import com.ibra.projecttracker.dto.response.DeveloperResponse;
 import com.ibra.projecttracker.dto.DeveloperDTO;
-import com.ibra.projecttracker.entity.Developer;
-import com.ibra.projecttracker.repository.DeveloperRepository;
 import com.ibra.projecttracker.service.DeveloperService;
-import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

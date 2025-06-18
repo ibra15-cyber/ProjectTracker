@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.service.impl;
 
-import com.ibra.projecttracker.dto.AuthRequest;
-import com.ibra.projecttracker.dto.UserCreateRequest;
+import com.ibra.projecttracker.dto.request.AuthRequest;
+import com.ibra.projecttracker.dto.request.UserCreateRequest;
 import com.ibra.projecttracker.dto.UserDTO;
 import com.ibra.projecttracker.entity.*;
 import com.ibra.projecttracker.exception.InvalidCredentialException;
@@ -22,7 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(userCreateRequest.getPhoneNumber())
                 .userRole(userCreateRequest.getUserRole())
                 .build();
-        //CAN I CONTROL AN ERROR MESSAGE
+
         User savedUser = userRepository.save(newUser);
         if (savedUser.getUserRole().name().equals("DEVELOPER")) {
             Developer developer = new Developer();
@@ -108,16 +107,17 @@ public class UserServiceImpl implements UserService {
             if (authentication.getPrincipal() instanceof AuthUser) {
                 AuthUser authUser = (AuthUser) authentication.getPrincipal();
                 loginUser = authUser.getUser();
+                log.info("Authentication successful for user: {}", loginUser.getEmail());
             } else {
-                // Fallback: get user by email if principal is not AuthUser
                 loginUser = userRepository.findByEmail(authRequest.email())
                         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                log.info("Authentication user found in db: {}", loginUser.getEmail());
             }
 
             log.info("Authentication successful for user: {}", loginUser.getEmail());
 
             // Generate JWT token and refresh token
-            String token = jwtUtils.generateToken(authRequest.email());
+            String token = jwtUtils.generateToken(loginUser.getEmail());
             String refreshToken = jwtUtils.generateRefreshToken(authRequest.email());
 
             Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(token);

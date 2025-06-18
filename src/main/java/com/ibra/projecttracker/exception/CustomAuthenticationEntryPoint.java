@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibra.projecttracker.dto.ErrorResponse;
+import com.ibra.projecttracker.dto.response.ErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

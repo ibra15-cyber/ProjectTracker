@@ -1,6 +1,6 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.TaskResponse;
+import com.ibra.projecttracker.dto.response.TaskResponse;
 import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;

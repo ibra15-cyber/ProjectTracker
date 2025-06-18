@@ -1,8 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
-import com.ibra.projecttracker.dto.TaskAssignmentResponse;
-import com.ibra.projecttracker.dto.TaskDTO;
+import com.ibra.projecttracker.dto.response.TaskAssignmentResponse;
 import com.ibra.projecttracker.entity.TaskAssignment;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.service.TaskAssignmentService;
@@ -14,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.springframework.security.authorization.AuthorityReactiveAuthorizationManager.hasAuthority;
 
 @RestController
 @RequestMapping("/api/v1/task-assignments")

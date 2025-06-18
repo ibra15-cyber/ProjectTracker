@@ -72,19 +72,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 } catch (ExpiredJwtException ex) {
                     SecurityContextHolder.clearContext();
-                    // Corrected logging for logger.error(String, Throwable)
                     logger.error("JWT expired: " + ex.getMessage(), ex);
                     response.sendError(HttpStatus.UNAUTHORIZED.value(), "JWT expired: " + ex.getMessage());
                     return;
                 } catch (InvalidTokenException ex) {
                     SecurityContextHolder.clearContext();
-                    // Corrected logging for logger.error(String, Throwable)
                     logger.error("Invalid token: " + ex.getMessage(), ex);
                     response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid token: " + ex.getMessage());
                     return;
                 } catch (Exception ex) {
                     SecurityContextHolder.clearContext();
-                    // Corrected logging for logger.error(String, Throwable)
                     logger.error("Error processing JWT token: " + ex.getMessage(), ex);
                     response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authentication error: " + ex.getMessage());
                     return;
@@ -93,7 +90,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            // Corrected logging for logger.error(String, Throwable)
             logger.error("Error in JwtAuthFilter: " + e.getMessage(), e);
             response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error during authentication.");
         }

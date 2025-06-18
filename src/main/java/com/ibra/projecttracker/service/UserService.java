@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.service;
 
-import com.ibra.projecttracker.dto.AuthRequest;
-import com.ibra.projecttracker.dto.UserCreateRequest;
+import com.ibra.projecttracker.dto.request.AuthRequest;
+import com.ibra.projecttracker.dto.request.UserCreateRequest;
 import com.ibra.projecttracker.dto.UserDTO;
 import jakarta.servlet.http.HttpServletRequest;
 

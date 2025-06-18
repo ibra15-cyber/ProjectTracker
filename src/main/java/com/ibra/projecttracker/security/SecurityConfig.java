@@ -1,5 +1,8 @@
 package com.ibra.projecttracker.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibra.projecttracker.exception.CustomAccessDeniedHandler;
+import com.ibra.projecttracker.exception.CustomAuthenticationEntryPoint;
 import com.ibra.projecttracker.security.jwt.JwtAuthFilter;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
 import com.ibra.projecttracker.security.openAuth2.OAuth2LoginSuccessHandler;
@@ -11,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,25 +53,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtUtils jwtUtils) throws Exception {
         httpSecurity
-//                .exceptionHandling(exceptions -> exceptions
-//                        .authenticationEntryPoint((request, response, authException) -> {
-//                            throw authException;
-//                        })
-//                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-//                            throw accessDeniedException;
-//                        }))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint(new ObjectMapper()))
+                        .accessDeniedHandler(new CustomAccessDeniedHandler(new ObjectMapper())))
                 .csrf(AbstractHttpConfigurer::disable).cors(withDefaults()).authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/v1/auth/oauth2/success", "/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh", "/api/v1/auth/logout", "/oauth2/authorization/**", "/oauth2/callback/**", "/login/oauth2/code/**").permitAll().requestMatchers("/api/v1/projects/**", "/api/v1/tasks/**", "/api/v1/users/**", "api/v1/task-assignments/**").authenticated().requestMatchers("/api/v1/tasks/**").authenticated().requestMatchers("/admin/**").hasAuthority("ADMIN").requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
-                        .anyRequest().authenticated())
-                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        request.requestMatchers("/api/v1/auth/oauth2/success", "/api/v1/auth/login", "/api/v1/auth/register",
+                                        "/api/v1/auth/refresh", "/api/v1/auth/logout", "/oauth2/authorization/**", "/oauth2/callback/**", "/login/oauth2/code/**").permitAll().requestMatchers("/api/v1/projects/**", "/api/v1/tasks/**", "/api/v1/users/**", "api/v1/task-assignments/**").authenticated().requestMatchers("/api/v1/tasks/**").authenticated().requestMatchers("/admin/**").hasAuthority("ADMIN").requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
+                                .anyRequest().authenticated())
+//                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(stdOAuth2UserService).oidcUserService(oidOAuth2UserService)).successHandler(oauth2LoginSuccessHandler))
+                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(
+                                userInfo ->
+                                        userInfo
+                                                .userService(stdOAuth2UserService)
+                                                .oidcUserService(oidOAuth2UserService))
+                        .successHandler(oauth2LoginSuccessHandler))
 
                 .headers(headers -> headers.frameOptions(configurer -> configurer.deny()).xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK)).contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; " + "script-src 'self' 'unsafe-inline'; " + "style-src 'self' 'unsafe-inline'; " + // ADDED: Allows inline styles
                                 "img-src 'self' data:; " +             // ADDED: Allows data: URIs for images
-                                "font-src 'self' https://cdn.scite.ai data: moz-extension:; " + "frame-ancestors 'none'"))
+                                "font-src 'self' https://cdn.scite.ai data: moz-extension:; "
+                                + "frame-ancestors 'none'"))
                         // Referrer Policy
                         .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                         .permissionsPolicy(permissions -> permissions.policy("camera=(), microphone=(), geolocation=()")));

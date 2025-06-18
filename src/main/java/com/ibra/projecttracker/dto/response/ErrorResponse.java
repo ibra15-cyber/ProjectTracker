@@ -1,4 +1,4 @@
-package com.ibra.projecttracker.dto;
+package com.ibra.projecttracker.dto.response;
 
 
 import lombok.Builder;

@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.dto.ProjectResponse;
+import com.ibra.projecttracker.dto.response.ProjectResponse;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.service.ProjectService;
 import jakarta.validation.Valid;
