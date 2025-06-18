@@ -22,59 +22,79 @@ public class DeveloperController {
         this.developerService = developerService;
     }
 
+    private DeveloperResponse buildDeveloperResponse(
+            String message,
+            HttpStatus status,
+            DeveloperDTO developer,
+            List<DeveloperDTO> developers,
+            Page<DeveloperDTO> developerPage) {
+        return DeveloperResponse.builder()
+                .message(message)
+                .statusCode(String.valueOf(status.value()))
+                .developer(developer)
+                .developers(developers)
+                .developerPage(developerPage)
+                .build();
+    }
 
     @PostMapping
     public ResponseEntity<DeveloperResponse> createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO newDeveloper = developerService.createDeveloper(developerDTO);
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("Developer created successfully")
-                .statusCode(String.valueOf(HttpStatus.CREATED))
-                .developer(newDeveloper)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(buildDeveloperResponse(
+                        "Developer created successfully",
+                        HttpStatus.CREATED,
+                        newDeveloper,
+                        null,
+                        null));
     }
 
     @GetMapping
     public ResponseEntity<DeveloperResponse> getAllDevelopers() {
         List<DeveloperDTO> developerDTOs = developerService.getAllDevelopers();
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("All developers retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .developers(developerDTOs)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildDeveloperResponse(
+                        "All developers retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        developerDTOs,
+                        null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeveloperResponse> getDeveloperById(@Valid @PathVariable("id") Long id) {
         DeveloperDTO developerDTO = developerService.getDeveloperById(id);
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("Developer retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .developer(developerDTO)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildDeveloperResponse(
+                        "Developer retrieved successfully",
+                        HttpStatus.OK,
+                        developerDTO,
+                        null,
+                        null));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DeveloperResponse> updateDeveloper(@PathVariable("id") Long id, @Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO updateDeveloper = developerService.updateDeveloper(id, developerDTO);
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("Developer updated successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .developer(updateDeveloper)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildDeveloperResponse(
+                        "Developer updated successfully",
+                        HttpStatus.OK,
+                        updateDeveloper,
+                        null,
+                        null));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<DeveloperResponse> deleteDeveloper(@PathVariable("id") Long id) {
         developerService.deleteDeveloper(id);
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("Developer deleted successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildDeveloperResponse(
+                        "Developer deleted successfully",
+                        HttpStatus.OK,
+                        null,
+                        null,
+                        null));
     }
 
     @GetMapping("/paginated")
@@ -85,22 +105,24 @@ public class DeveloperController {
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
         Page<DeveloperDTO> developersPage = developerService.getDevelopersPageable(page, size, sortBy, sortDirection);
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("All developers retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .developerPage(developersPage)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildDeveloperResponse(
+                        "All developers retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        null,
+                        developersPage));
     }
 
     @GetMapping("/developers/top5")
     public ResponseEntity<DeveloperResponse> getTop5Developers() {
         List<DeveloperDTO> developerDTOs = developerService.findTop5DevelopersWithMostTasksAssigned();
-        DeveloperResponse response = DeveloperResponse.builder()
-                .message("All developers retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .developers(developerDTOs)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildDeveloperResponse(
+                        "Top 5 developers retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        developerDTOs,
+                        null));
     }
 }

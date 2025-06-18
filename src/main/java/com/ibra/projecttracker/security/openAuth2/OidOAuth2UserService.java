@@ -1,6 +1,5 @@
 package com.ibra.projecttracker.security.openAuth2;
 
-import com.ibra.projecttracker.entity.Contractor;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.repository.ContractorRepository;
@@ -8,7 +7,6 @@ import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -36,7 +34,7 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-        System.out.println("Loading OIDC user from request: " + userRequest);
+        log.info("Loading OIDC user from request: {}", userRequest);
         userRequest.getIdToken().getEmail();
 
         OidcUser oidcUser;
@@ -50,8 +48,7 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
                 userRequest.getIdToken());
         }
 
-        log.debug("oidcUser .....................{}", oidcUser.toString());
-        System.out.println("oidUser......" +oidcUser);
+        log.info("User email: {}", oidcUser.getEmail());
 
         String email = oidcUser.getEmail();
 
@@ -65,7 +62,7 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
         log.debug("User found or created: {}", user);
 
         String token = jwtUtils.generateToken(user);
-        System.out.println("Generated JWT Token in oid class: " + token);
+        log.info("User logged in. Spring Security Context Authorities: {}", oidcUser.getAuthorities());
 
         return oidcUser;
     }

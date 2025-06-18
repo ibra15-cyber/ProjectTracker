@@ -23,78 +23,106 @@ public class ProjectController {
 
     public ProjectController(ProjectService projectService) {
         this.projectService = projectService;
-
     }
 
+    private ProjectResponse buildProjectResponse(
+            String message,
+            HttpStatus status,
+            ProjectDTO project,
+            List<ProjectDTO> projects,
+            Page<ProjectDTO> projectPage,
+            Map<String, String> projectSummary) {
+        return ProjectResponse.builder()
+                .message(message)
+                .statusCode(String.valueOf(status.value()))
+                .project(project)
+                .projects(projects)
+                .projectPage(projectPage)
+                .projectSummary(projectSummary)
+                .build();
+    }
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO newProject = projectService.createProject(projectDTO);
-        ProjectResponse response = ProjectResponse.builder()
-                .message("Project created successfully")
-                .statusCode(String.valueOf(HttpStatus.CREATED))
-                .project(newProject)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(buildProjectResponse(
+                        "Project created successfully",
+                        HttpStatus.CREATED,
+                        newProject,
+                        null,
+                        null,
+                        null));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> getAllProjects() {
         List<ProjectDTO> projectDTOs = projectService.getAllProjects();
-        ProjectResponse response = ProjectResponse.builder()
-                .message("All projects retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .projects(projectDTOs)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "All projects retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        projectDTOs,
+                        null,
+                        null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(@PathVariable("id") Long id) {
         ProjectDTO projectDTO = projectService.getProjectById(id);
-        ProjectResponse response = ProjectResponse.builder()
-                .message("Project retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .project(projectDTO)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "Project retrieved successfully",
+                        HttpStatus.OK,
+                        projectDTO,
+                        null,
+                        null,
+                        null));
     }
-    
+
     @GetMapping("/{id}/summary")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
     public ResponseEntity<ProjectResponse> getProjectSummary(@PathVariable("id") Long id) {
         Map<String, String> projectSummary = projectService.getProjectSummary(id);
-        ProjectResponse response = ProjectResponse.builder()
-                .message("Project summary retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .projectSummary(projectSummary)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "Project summary retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        null,
+                        null,
+                        projectSummary));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO updateProject = projectService.updateProject(id, projectDTO);
-        ProjectResponse response = ProjectResponse.builder()
-                .message("Project updated successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .project(updateProject)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "Project updated successfully",
+                        HttpStatus.OK,
+                        updateProject,
+                        null,
+                        null,
+                        null));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectResponse> deleteProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
-        ProjectResponse response = ProjectResponse.builder()
-                .message("Project deleted successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "Project deleted successfully",
+                        HttpStatus.OK,
+                        null,
+                        null,
+                        null,
+                        null));
     }
 
     @GetMapping("/paginated")
@@ -105,43 +133,40 @@ public class ProjectController {
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
         Page<ProjectDTO> projectsPage = projectService.getProjectsPageable(page, size, sortBy, sortDirection);
-        ProjectResponse response = ProjectResponse.builder()
-                .message("All projects retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .projectPage(projectsPage)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "All projects retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        null,
+                        projectsPage,
+                        null));
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<ProjectResponse> filterProject(@RequestParam(required = false) Long projectId,
-                                                  @RequestParam(required = false) String name,
-                                                  @RequestParam(required = false) String description,
-                                                  @RequestParam(required = false)
-                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                  LocalDateTime createdAt,
-                                                  @RequestParam(required = false)
-                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                  LocalDateTime deadline,
-                                                  @RequestParam(required = false) ProjectStatus status,
-                                                  @RequestParam(defaultValue = "0") int pageNumber,
-                                                  @RequestParam(defaultValue = "100") int pageSize,
-                                                  @RequestParam(defaultValue = "projectId") String sortBy) {
+    public ResponseEntity<ProjectResponse> filterProject(
+            @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAt,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime deadline,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "100") int pageSize,
+            @RequestParam(defaultValue = "projectId") String sortBy) {
 
-        List<ProjectDTO> projectDTOS = projectService.dynamicFilterProjects(projectId, name, description,
-                createdAt, deadline, status, pageSize, pageNumber, sortBy);
+        List<ProjectDTO> projectDTOS = projectService.dynamicFilterProjects(
+                projectId, name, description, createdAt, deadline, status, pageSize, pageNumber, sortBy);
 
-        ProjectResponse response = ProjectResponse.builder()
-                .message("Projects retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .projects(projectDTOS)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildProjectResponse(
+                        "Projects retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        projectDTOS,
+                        null,
+                        null));
     }
-    
-    
-
-
-
 }

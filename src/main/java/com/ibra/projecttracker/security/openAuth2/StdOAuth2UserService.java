@@ -20,22 +20,19 @@ import java.util.UUID;
 @Service
 public class StdOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
-    private final AuditLogService auditLogService;
-    private final ContractorRepository contractorRepository;
 
-    public StdOAuth2UserService(UserRepository userRepository, AuditLogService auditLogService, ContractorRepository contractorRepository) {
+    public StdOAuth2UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.auditLogService = auditLogService;
-        this.contractorRepository = contractorRepository;
     }
+
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = super.loadUser(userRequest);
-        log.info("open oauth2 standard user " + oauth2User.toString());
-        System.out.println("open oauth2 user ........................" + oauth2User);
+        log.info("open oauth2 standard user {}", oauth2User.toString());
+
         String accessToken = userRequest.getAccessToken().getTokenValue();
-        System.out.println("open oauth2 token ........................"+ accessToken);
+        log.info("open oauth2 standard access token {}", accessToken);
 
         String email = oauth2User.getAttribute("email");
         String username = oauth2User.getAttribute("login");
@@ -58,7 +55,7 @@ public class StdOAuth2UserService extends DefaultOAuth2UserService {
         user.setFirstName(oauth2User.getAttribute("login"));
         user.setUserRole(UserRole.CONTRACTOR);
 
-        log.info("user found or created: " + user);
+        log.info("user found or created: {}", user);
         return userRepository.save(user);
     }
 }

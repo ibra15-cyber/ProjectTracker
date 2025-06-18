@@ -38,7 +38,7 @@ public class JwtUtils {
     }
 
     public String generateToken(String username) {
-        System.out.println("Generating JWT for username: " + username);
+        log.info("Generating JWT for username: {}", username);
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))

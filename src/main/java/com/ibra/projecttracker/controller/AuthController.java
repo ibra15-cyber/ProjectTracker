@@ -33,35 +33,30 @@ public class AuthController {
     public ResponseEntity<AuthResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
         log.debug(userCreateRequest.toString());
         UserDTO userDTO = userService.createUser(userCreateRequest);
-        AuthResponse response = AuthResponse.builder()
-                .message("User created successfully")
-                .statusCode(String.valueOf(HttpStatus.CREATED))
-                .user(userDTO)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildAuthResponse("User created successfully", HttpStatus.CREATED, userDTO, null));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginUser(@Valid @RequestBody AuthRequest authRequest) {
         Map<String, String> loginResponse = userService.loginUser(authRequest);
-        AuthResponse response = AuthResponse.builder()
-                .message("User logged in successfully")
-                .statusCode(String.valueOf(HttpStatus.CREATED))
-                .loginResponse(loginResponse)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildAuthResponse("User logged in successfully", HttpStatus.CREATED, null, loginResponse));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request) {
         Map<String, String> tokenMap = userService.refreshToken(request);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildAuthResponse("Token refreshed successfully", HttpStatus.OK, null, tokenMap));
+    }
 
-        AuthResponse response = AuthResponse.builder()
-                .message("Token refreshed successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .loginResponse(tokenMap)
+
+    private AuthResponse buildAuthResponse(String message, HttpStatus status, UserDTO user, Map<String, String> loginResponse) {
+        return AuthResponse.builder()
+                .message(message)
+                .statusCode(String.valueOf(status.value()))
+                .user(user)
+                .loginResponse(loginResponse)
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

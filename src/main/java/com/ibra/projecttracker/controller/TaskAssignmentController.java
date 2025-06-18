@@ -26,74 +26,87 @@ public class TaskAssignmentController {
         this.entityDTOMapper = entityDTOMapper;
     }
 
+    // Helper method to build responses
+    private TaskAssignmentResponse buildTaskAssignmentResponse(
+            String message,
+            HttpStatus status,
+            TaskAssignmentDTO taskAssignment,
+            List<TaskAssignmentDTO> taskAssignments) {
+        return TaskAssignmentResponse.builder()
+                .message(message)
+                .statusCode(String.valueOf(status.value()))
+                .taskAssignment(taskAssignment)
+                .taskAssignments(taskAssignments)
+                .build();
+    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
-        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
-                .message("Task assigned successfully")
-                .statusCode(String.valueOf(HttpStatus.CREATED))
-                .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(newTask))
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(buildTaskAssignmentResponse(
+                        "Task assigned successfully",
+                        HttpStatus.CREATED,
+                        entityDTOMapper.mapTaskAssignmentToDTO(newTask),
+                        null));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> getAllTasks() {
-        List<TaskAssignment> assignTaskRequests = taskAssignmentService.getAllTaskAssignments();
-        List<TaskAssignmentDTO> assignmentDTOS = assignTaskRequests.stream().map(entityDTOMapper::mapTaskAssignmentToDTO).collect(Collectors.toList());
-        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
-                .message("All assigned tasks retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .taskAssignments(assignmentDTOS)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        List<TaskAssignmentDTO> assignmentDTOS = taskAssignmentService.getAllTaskAssignments()
+                .stream()
+                .map(entityDTOMapper::mapTaskAssignmentToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskAssignmentResponse(
+                        "All assigned tasks retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        assignmentDTOS));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TaskAssignmentResponse> getTaskById(@PathVariable("id") Long id) {
         TaskAssignment assignTaskRequest = taskAssignmentService.getTaskAssignmentById(id);
-        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
-                .message("Assigned task retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(assignTaskRequest))
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskAssignmentResponse(
+                        "Assigned task retrieved successfully",
+                        HttpStatus.OK,
+                        entityDTOMapper.mapTaskAssignmentToDTO(assignTaskRequest),
+                        null));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskAssignmentResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment updateTask = taskAssignmentService.updateTask(id, taskAssignmentDTO);
-        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
-                .message("Assigned task updated successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .taskAssignment(entityDTOMapper.mapTaskAssignmentToDTO(updateTask))
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(buildTaskAssignmentResponse(
+                        "Assigned task updated successfully",
+                        HttpStatus.OK,
+                        entityDTOMapper.mapTaskAssignmentToDTO(updateTask),
+                        null));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<TaskAssignmentResponse> deleteTask(@PathVariable("id") Long id) {
         taskAssignmentService.deleteTask(id);
-        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
-                .message("Assigned task deleted successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskAssignmentResponse(
+                        "Assigned task deleted successfully",
+                        HttpStatus.OK,
+                        null,
+                        null));
     }
 
     @GetMapping("/by-developerId/{developerId}")
     public ResponseEntity<TaskAssignmentResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
-        TaskAssignmentResponse response = TaskAssignmentResponse.builder()
-                .message("assigned task retrieved successful")
-                .statusCode(HttpStatus.OK.toString())
-                .taskAssignments(taskAssignmentByDeveloper)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskAssignmentResponse(
+                        "Assigned tasks retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        taskAssignmentByDeveloper));
     }
-
-
 }

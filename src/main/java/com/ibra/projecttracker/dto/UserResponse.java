@@ -1,9 +1,9 @@
-package com.ibra.projecttracker.dto.response;
+package com.ibra.projecttracker.dto;
 
 
-import com.ibra.projecttracker.dto.UserDTO;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 

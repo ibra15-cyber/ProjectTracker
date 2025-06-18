@@ -20,77 +20,90 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    // Helper method to build responses
+    private TaskResponse buildTaskResponse(
+            String message,
+            HttpStatus status,
+            TaskDTO task,
+            List<TaskDTO> tasks) {
+        return TaskResponse.builder()
+                .message(message)
+                .statusCode(String.valueOf(status.value()))
+                .task(task)
+                .tasks(tasks)
+                .build();
+    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO newTask = taskService.createTask(taskDTO);
-        TaskResponse response = TaskResponse.builder()
-                .message("Task created successfully")
-                .statusCode(String.valueOf(HttpStatus.CREATED))
-                .task(newTask)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(buildTaskResponse(
+                        "Task created successfully",
+                        HttpStatus.CREATED,
+                        newTask,
+                        null));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskResponse> getAllTasks() {
         List<TaskDTO> taskDTOs = taskService.getAllTasks();
-        TaskResponse response = TaskResponse.builder()
-                .message("All tasks retrieved successfully")
-                .statusCode(String.valueOf(HttpStatus.OK))
-                .tasks(taskDTOs)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "All tasks retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        taskDTOs));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER')")
     public ResponseEntity<TaskResponse> getTaskById(@PathVariable("id") Long id) {
         TaskDTO taskDTO = taskService.getTaskById(id);
-        TaskResponse response = TaskResponse.builder()
-                .message("Task retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .task(taskDTO)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "Task retrieved successfully",
+                        HttpStatus.OK,
+                        taskDTO,
+                        null));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or  (hasAnyAuthority('DEVELOPER') and securityUtils.isTaskOwner(#id))")
+    @PreAuthorize("hasAuthority('ADMIN') or (hasAnyAuthority('DEVELOPER') and @securityUtils.isTaskOwner(#id))")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO updateTask = taskService.updateTask(id, taskDTO);
-        TaskResponse response = TaskResponse.builder()
-                .message("Task updated successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .task(updateTask)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "Task updated successfully",
+                        HttpStatus.OK,
+                        updateTask,
+                        null));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskResponse> deleteTask(@PathVariable("id") Long id) {
         taskService.deleteTask(id);
-        TaskResponse response = TaskResponse.builder()
-                .message("Task deleted successfully")
-                .statusCode(HttpStatus.NO_CONTENT.toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "Task deleted successfully",
+                        HttpStatus.OK,
+                        null,
+                        null));
     }
 
     @GetMapping("/by-projectId/{projectId}")
     public ResponseEntity<TaskResponse> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
         List<TaskDTO> projectDTOS = taskService.getTasksByProjectId(projectId);
-        TaskResponse response = TaskResponse.builder()
-                .message("Tasks retrieved successful")
-                .statusCode(HttpStatus.OK.toString())
-                .tasks(projectDTOS)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "Tasks retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        projectDTOS));
     }
-
 
     @GetMapping("/sort")
     public ResponseEntity<TaskResponse> getAllTasks(
@@ -98,29 +111,27 @@ public class TaskController {
             @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
 
         List<TaskDTO> tasks = taskService.getAllTasksBySort(sortBy, sortDirection);
-        TaskResponse response = TaskResponse.builder()
-                .message("All tasks retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .tasks(tasks)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "All tasks retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        tasks));
     }
 
     @GetMapping("/overdue")
     public ResponseEntity<TaskResponse> getOverdueTasks() {
         List<TaskDTO> taskDTOS = taskService.findOverdueTasks();
-        TaskResponse response = TaskResponse.builder()
-                .message("Tasks retrieved successfully")
-                .statusCode(HttpStatus.OK.toString())
-                .tasks(taskDTOS)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildTaskResponse(
+                        "Overdue tasks retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        taskDTOS));
     }
 
     @GetMapping("/countsByStatus")
     public List<Object[]> getTaskCountsByStatus() {
         return taskService.findTaskCountsGroupedByStatusAndProject();
     }
-
-
 }
