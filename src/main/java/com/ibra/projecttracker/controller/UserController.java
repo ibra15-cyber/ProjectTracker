@@ -58,6 +58,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and @securityUtils.isUserOwner(#id))")
     public ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long id) {
         UserDTO userDTO = userService.getUserById(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -69,7 +70,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and @securityUtils.isUserOwner(#id))")
     public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserDTO userDTO) {
         UserDTO updatedUserDTO = userService.updateUser(id, userDTO);
         return ResponseEntity.status(HttpStatus.OK)

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class DeveloperController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperResponse> createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO newDeveloper = developerService.createDeveloper(developerDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -50,6 +52,7 @@ public class DeveloperController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperResponse> getAllDevelopers() {
         List<DeveloperDTO> developerDTOs = developerService.getAllDevelopers();
         return ResponseEntity.status(HttpStatus.OK)
@@ -62,6 +65,7 @@ public class DeveloperController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperResponse> getDeveloperById(@Valid @PathVariable("id") Long id) {
         DeveloperDTO developerDTO = developerService.getDeveloperById(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -74,6 +78,7 @@ public class DeveloperController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperResponse> updateDeveloper(@PathVariable("id") Long id, @Valid @RequestBody DeveloperDTO developerDTO) {
         DeveloperDTO updateDeveloper = developerService.updateDeveloper(id, developerDTO);
         return ResponseEntity.status(HttpStatus.OK)
@@ -86,6 +91,7 @@ public class DeveloperController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DeveloperResponse> deleteDeveloper(@PathVariable("id") Long id) {
         developerService.deleteDeveloper(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -98,6 +104,7 @@ public class DeveloperController {
     }
 
     @GetMapping("/paginated")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperResponse> getDeveloperPageable(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -115,6 +122,7 @@ public class DeveloperController {
     }
 
     @GetMapping("/developers/top5")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperResponse> getTop5Developers() {
         List<DeveloperDTO> developerDTOs = developerService.findTop5DevelopersWithMostTasksAssigned();
         return ResponseEntity.status(HttpStatus.OK)

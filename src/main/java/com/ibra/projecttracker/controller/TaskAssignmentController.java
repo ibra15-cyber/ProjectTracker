@@ -41,7 +41,7 @@ public class TaskAssignmentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,7 +53,7 @@ public class TaskAssignmentController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> getAllTasks() {
         List<TaskAssignmentDTO> assignmentDTOS = taskAssignmentService.getAllTaskAssignments()
                 .stream()
@@ -68,6 +68,7 @@ public class TaskAssignmentController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER')")
     public ResponseEntity<TaskAssignmentResponse> getTaskById(@PathVariable("id") Long id) {
         TaskAssignment assignTaskRequest = taskAssignmentService.getTaskAssignmentById(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -79,16 +80,18 @@ public class TaskAssignmentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment updateTask = taskAssignmentService.updateTask(id, taskAssignmentDTO);
         return ResponseEntity.status(HttpStatus.OK).body(buildTaskAssignmentResponse(
-                        "Assigned task updated successfully",
-                        HttpStatus.OK,
-                        entityDTOMapper.mapTaskAssignmentToDTO(updateTask),
-                        null));
+                "Assigned task updated successfully",
+                HttpStatus.OK,
+                entityDTOMapper.mapTaskAssignmentToDTO(updateTask),
+                null));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<TaskAssignmentResponse> deleteTask(@PathVariable("id") Long id) {
         taskAssignmentService.deleteTask(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -100,6 +103,7 @@ public class TaskAssignmentController {
     }
 
     @GetMapping("/by-developerId/{developerId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER') or (hasAuthority('DEVELOPER') and @securityUtils.isDeveloperOwner(#developerId))")
     public ResponseEntity<TaskAssignmentResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
         return ResponseEntity.status(HttpStatus.OK)
