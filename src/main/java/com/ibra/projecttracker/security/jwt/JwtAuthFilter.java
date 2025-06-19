@@ -35,24 +35,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
-        String path = request.getRequestURI();
-
-        // Skip JWT filter for non-API endpoints (OAuth2 flow)
-        if (!path.startsWith("/api/")) {
-            return true;
-        }
-
-        // Skip JWT filter for public API endpoints
-        return path.startsWith("/api/v1/auth/login") ||
-                path.startsWith("/api/v1/auth/register") ||
-                path.startsWith("/api/v1/auth/refresh") ||
-                path.startsWith("/api/v1/auth/logout") ||
-                path.startsWith("/api/v1/auth/oauth2/success") ||
-                path.startsWith("/api/v1/home");
-    }
-
-    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {

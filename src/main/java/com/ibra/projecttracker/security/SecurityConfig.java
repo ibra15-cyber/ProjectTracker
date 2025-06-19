@@ -1,10 +1,8 @@
 package com.ibra.projecttracker.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibra.projecttracker.exception.CustomAccessDeniedHandler;
 import com.ibra.projecttracker.exception.CustomAuthenticationEntryPoint;
 import com.ibra.projecttracker.security.jwt.JwtAuthFilter;
-import com.ibra.projecttracker.security.jwt.JwtUtils;
 import com.ibra.projecttracker.security.openAuth2.OAuth2LoginSuccessHandler;
 import com.ibra.projecttracker.security.openAuth2.OidOAuth2UserService;
 import com.ibra.projecttracker.security.openAuth2.StdOAuth2UserService;
@@ -20,6 +18,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -79,7 +78,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers
-                        .frameOptions(configurer -> configurer.deny())
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
                         .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; " +
@@ -118,7 +117,7 @@ public class SecurityConfig {
                                 .oidcUserService(oidOAuth2UserService))
                         .successHandler(oauth2LoginSuccessHandler))
                 .headers(headers -> headers
-                        .frameOptions(configurer -> configurer.deny())
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
                         .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; " +
