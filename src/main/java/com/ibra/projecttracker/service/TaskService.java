@@ -1,7 +1,6 @@
 package com.ibra.projecttracker.service;
 
 import com.ibra.projecttracker.dto.TaskDTO;
-import com.ibra.projecttracker.entity.Task;
 
 import java.util.List;
 

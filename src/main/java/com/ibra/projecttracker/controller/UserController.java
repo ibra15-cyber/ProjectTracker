@@ -1,6 +1,8 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.*;
+import com.ibra.projecttracker.dto.request.UpdateUserRequest;
+import com.ibra.projecttracker.dto.response.UserSuccessResponse;
 import com.ibra.projecttracker.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,13 +21,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Helper method to build responses
-    private UserResponse buildUserResponse(
+    private UserSuccessResponse buildUserResponse(
             String message,
             HttpStatus status,
             UserDTO user,
             List<UserDTO> users) {
-        return UserResponse.builder()
+        return UserSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .user(user)
@@ -35,7 +36,7 @@ public class UserController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserResponse> loggedInUser() {
+    public ResponseEntity<UserSuccessResponse> loggedInUser() {
         UserDTO userDTO = userService.getLoginUser();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildUserResponse(
@@ -47,7 +48,7 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<UserResponse> getAllUsers() {
+    public ResponseEntity<UserSuccessResponse> getAllUsers() {
         List<UserDTO> userDTOS = userService.getAllUsers();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildUserResponse(
@@ -59,7 +60,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and @securityUtils.isUserOwner(#id))")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<UserSuccessResponse> getUserById(@PathVariable("id") Long id) {
         UserDTO userDTO = userService.getUserById(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildUserResponse(
@@ -71,7 +72,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and @securityUtils.isUserOwner(#id))")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserSuccessResponse> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userDTO) {
         UserDTO updatedUserDTO = userService.updateUser(id, userDTO);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildUserResponse(
@@ -83,7 +84,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<UserResponse> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<UserSuccessResponse> deleteTask(@PathVariable("id") Long id) {
         userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildUserResponse(

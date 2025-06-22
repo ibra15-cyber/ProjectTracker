@@ -1,6 +1,7 @@
 package com.ibra.projecttracker.dto.response;
 
 
+import com.ibra.projecttracker.dto.DeveloperDTO;
 import com.ibra.projecttracker.dto.DeveloperResponseDTO;
 import lombok.Builder;
 import lombok.Data;
@@ -10,13 +11,13 @@ import java.util.List;
 
 @Builder
 @Data
-public class DeveloperResponse {
+public class DeveloperSuccessResponse {
     private String message;
     private String statusCode;
     private Long timestamp;
 
-    private DeveloperResponseDTO developer;
-    private List<DeveloperResponseDTO> developers;
+    private DeveloperDTO developer;
+    private List<DeveloperDTO> developers;
 
-    private Page<DeveloperResponseDTO> developerPage;
+    private Page<DeveloperDTO> developerPage;
 }

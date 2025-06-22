@@ -2,62 +2,58 @@ package com.ibra.projecttracker.entity;
 
 import com.ibra.projecttracker.enums.UserRole;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+import java.io.Serializable;
+
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class User {
+@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
+
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString(exclude = {"password", "refreshToken"})
+@EqualsAndHashCode(of = "id")
+@SuperBuilder
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
-//    @NotBlank(message = "first name can't be blank")
-//    @Size(max = 15)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-//    @NotBlank(message = "first name can't be blank")
-//    @Size( max = 15)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-//    @NotBlank(message = "Phone number must be entered")
-//    @Size(max = 10)
-    private String phoneNumber;
-
-    @Column(unique = true)
-    @Email()
-    @NotBlank(message = "Email can not be blank")
-    private String email;
-
-//    @NotBlank(message = "password can't be blank")
-//    @Size(min = 6, max = 100)
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role_enum", nullable = false)
     private UserRole userRole;
 
-    private String refreshedToken;
-
-    @OneToOne(optional = true, mappedBy = "user")
-    private Admin admin;
-
-    @OneToOne(optional = true, mappedBy = "user")
-    private Developer developer;
-
-    @OneToOne(optional = true, mappedBy = "user")
-    private Contractor contractor;
-
-    @OneToOne(optional = true, mappedBy = "user")
-    private Manager manager;
+    public User(String firstName, String lastName, String password, String email, String phoneNumber,
+               UserRole role) {
+        this.password = password;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userRole = role;
+    }
 }

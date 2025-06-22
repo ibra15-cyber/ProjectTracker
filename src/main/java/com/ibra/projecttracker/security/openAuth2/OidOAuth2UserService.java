@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -71,6 +72,8 @@ public class OidOAuth2UserService implements OAuth2UserService<OidcUserRequest, 
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setFirstName(firstName);
+        newUser.setLastName("Contractor");
+        newUser.setPassword(UUID.randomUUID().toString());
         if (Objects.equals(email, "152512sch@gmail.com")) {
             newUser.setUserRole(UserRole.ADMIN);
         } else {

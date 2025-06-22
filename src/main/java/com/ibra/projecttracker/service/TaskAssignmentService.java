@@ -12,5 +12,4 @@ public interface TaskAssignmentService {
     TaskAssignment updateTask(Long taskId, TaskAssignmentDTO taskAssignmentDTO);
     void deleteTask(Long taskId);
     List<TaskAssignmentDTO> getAllTaskAssignmentByDeveloper(Long developerId);
-    boolean isTaskAssignedToDeveloperUser(Long taskId, Long userId);
 }

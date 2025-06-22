@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.ProjectDTO;
-import com.ibra.projecttracker.dto.response.ProjectResponse;
+import com.ibra.projecttracker.dto.response.ProjectSuccessResponse;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.service.ProjectService;
 import jakarta.validation.Valid;
@@ -25,14 +25,14 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    private ProjectResponse buildProjectResponse(
+    private ProjectSuccessResponse buildProjectResponse(
             String message,
             HttpStatus status,
             ProjectDTO project,
             List<ProjectDTO> projects,
             Page<ProjectDTO> projectPage,
             Map<String, String> projectSummary) {
-        return ProjectResponse.builder()
+        return ProjectSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .project(project)
@@ -44,7 +44,7 @@ public class ProjectController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
+    public ResponseEntity<ProjectSuccessResponse> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO newProject = projectService.createProject(projectDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(buildProjectResponse(
@@ -58,7 +58,7 @@ public class ProjectController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<ProjectResponse> getAllProjects() {
+    public ResponseEntity<ProjectSuccessResponse> getAllProjects() {
         List<ProjectDTO> projectDTOs = projectService.getAllProjects();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
@@ -71,7 +71,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable("id") Long id) {
+    public ResponseEntity<ProjectSuccessResponse> getProjectById(@PathVariable("id") Long id) {
         ProjectDTO projectDTO = projectService.getProjectById(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
@@ -85,7 +85,7 @@ public class ProjectController {
 
     @GetMapping("/{id}/summary")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
-    public ResponseEntity<ProjectResponse> getProjectSummary(@PathVariable("id") Long id) {
+    public ResponseEntity<ProjectSuccessResponse> getProjectSummary(@PathVariable("id") Long id) {
         Map<String, String> projectSummary = projectService.getProjectSummary(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
@@ -99,7 +99,7 @@ public class ProjectController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<ProjectResponse> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
+    public ResponseEntity<ProjectSuccessResponse> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
         ProjectDTO updateProject = projectService.updateProject(id, projectDTO);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
@@ -113,7 +113,7 @@ public class ProjectController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<ProjectResponse> deleteProject(@PathVariable("id") Long id) {
+    public ResponseEntity<ProjectSuccessResponse> deleteProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
@@ -126,7 +126,7 @@ public class ProjectController {
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<ProjectResponse> getProjectPageable(
+    public ResponseEntity<ProjectSuccessResponse> getProjectPageable(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "projectId") String sortBy,
@@ -144,7 +144,7 @@ public class ProjectController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<ProjectResponse> filterProject(
+    public ResponseEntity<ProjectSuccessResponse> filterProject(
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,

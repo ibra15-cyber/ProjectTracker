@@ -42,10 +42,10 @@ public class EntityDTOMapper {
             return null;
         }
         DeveloperDTO developerDTO = new DeveloperDTO();
-        developerDTO.setId(developer.getDeveloperId());
-        developerDTO.setName(developer.getName());
+        developerDTO.setId(developer.getId());
+        developerDTO.setName(developer.getFirstName() + " " + developer.getLastName());
         developerDTO.setEmail(developer.getEmail());
-        developerDTO.setSkill(developer.getSkills());
+        developerDTO.setSkill(developer.getSkill());
         return developerDTO;
     }
 
@@ -54,7 +54,7 @@ public class EntityDTOMapper {
             return null;
         }
         return new UserDTO(
-                user.getUserId(),
+                user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
@@ -73,13 +73,50 @@ public class EntityDTOMapper {
         dto.setTaskAssignmentId(taskAssignment.getTaskAssignmentId());
         dto.setTaskId(taskAssignment.getTask().getTaskId());
         dto.setTaskTitle(taskAssignment.getTask().getTitle());
-        dto.setDeveloperId(taskAssignment.getDeveloper().getDeveloperId());
-        dto.setDeveloperName(taskAssignment.getDeveloper().getName());
+        dto.setDeveloperId(taskAssignment.getDeveloper().getId());
+        dto.setDeveloperName(taskAssignment.getDeveloper().getFirstName() + " " + taskAssignment.getDeveloper().getLastName());
         dto.setAssignedOn(taskAssignment.getAssignedOn());
         dto.setStatus(taskAssignment.getStatus());
         dto.setDeadline(taskAssignment.getDeadline());
         dto.setCompletedOn(taskAssignment.getCompletedOn());
         return dto;
+    }
+
+    public AdminDTO mapAdminToAdminDTO(Admin admin) {
+        if (admin == null) {
+            return null;
+        }
+        AdminDTO adminDTO = new AdminDTO();
+        adminDTO.setId(admin.getId());
+        adminDTO.setName(admin.getFirstName() + " " + admin.getLastName());
+        adminDTO.setEmail(admin.getEmail());
+        adminDTO.setAdminLevel(admin.getAdminLevel());
+        return adminDTO;
+    }
+
+    public ManagerDTO mapManagerToManagerDTO(Manager manager) {
+        if (manager == null) {
+            return null;
+        }
+        ManagerDTO managerDTO = new ManagerDTO();
+        managerDTO.setId(manager.getId());
+        managerDTO.setName(manager.getFirstName() + " " + manager.getLastName());
+        managerDTO.setEmail(manager.getEmail());
+        managerDTO.setDepartment(manager.getDepartment());
+        return managerDTO;
+    }
+
+    public ContractorDTO mapContractorToContractorDTO(Contractor contractor) {
+        if (contractor == null) {
+            return null;
+        }
+        ContractorDTO contractorDTO = new ContractorDTO();
+        contractorDTO.setId(contractor.getId());
+        contractorDTO.setName(contractor.getFirstName() + " " + contractor.getLastName());
+        contractorDTO.setEmail(contractor.getEmail());
+        contractorDTO.setCompanyName(contractor.getCompanyName());
+        contractorDTO.setCompanyAddress(contractor.getCompanyAddress());
+        return contractorDTO;
     }
 }
 

@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Builder
 @Data
-public class AuthResponse {
+public class AuthSuccessResponse {
     private String message;
     private String statusCode;
     private Long timestamp;

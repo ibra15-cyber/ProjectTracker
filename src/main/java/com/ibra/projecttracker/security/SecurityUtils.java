@@ -1,12 +1,12 @@
 package com.ibra.projecttracker.security;
 
-import com.ibra.projecttracker.dto.UserDTO;
-import com.ibra.projecttracker.entity.Developer;
+import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.entity.User;
-import com.ibra.projecttracker.repository.DeveloperRepository;
+import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.repository.UserRepository;
-import com.ibra.projecttracker.service.TaskAssignmentService;
-import com.ibra.projecttracker.service.UserService;
+import com.ibra.projecttracker.repository.TaskRepository;
+import com.ibra.projecttracker.repository.TaskAssignmentRepository;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,16 +14,14 @@ import org.springframework.stereotype.Component;
 @Component("SecurityUtils")
 public class SecurityUtils {
 
-    private final TaskAssignmentService taskAssignmentService;
-    private final UserService userService;
     private final UserRepository userRepository;
-    private final DeveloperRepository developerRepository;
+    private final TaskRepository taskRepository;
+    private final TaskAssignmentRepository taskAssignmentRepository; // NEW INJECTION
 
-    public SecurityUtils(TaskAssignmentService taskAssignmentService, UserService userService, UserRepository userRepository, DeveloperRepository developerRepository) {
-        this.taskAssignmentService = taskAssignmentService;
-        this.userService = userService;
+    public SecurityUtils(UserRepository userRepository, TaskRepository taskRepository, TaskAssignmentRepository taskAssignmentRepository) {
         this.userRepository = userRepository;
-        this.developerRepository = developerRepository;
+        this.taskRepository = taskRepository;
+        this.taskAssignmentRepository = taskAssignmentRepository;
     }
 
     public boolean isTaskOwner(Long taskId) {
@@ -32,21 +30,30 @@ public class SecurityUtils {
             return false;
         }
 
-        UserDTO currentUser = userService.getLoginUser();
+        String currentUsername = auth.getName();
+        User currentUser = userRepository.findByEmail(currentUsername).orElse(null);
 
-        if (currentUser == null || currentUser.id() == null) {
+        if (currentUser == null) {
             return false;
         }
 
-        Long currentUserId = currentUser.id();
-
-        try {
-            return taskAssignmentService.isTaskAssignedToDeveloperUser(taskId, currentUserId);
-        } catch (Exception e) {
-            System.err.println("Exception during isTaskOwner check for taskId " + taskId + " and userId " + currentUserId + ": " + e.getMessage());
-            e.printStackTrace();
+        // Fetch the Task to ensure it exists (optional, but good practice)
+        Task task = taskRepository.findById(taskId).orElse(null);
+        if (task == null) {
             return false;
         }
+
+        boolean result = taskAssignmentRepository.existsByTaskAndDeveloper(task, currentUser);
+        return result;
+    }
+
+    public boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(UserRole.ADMIN.name()));
     }
 
     public boolean isUserOwner(Long userId) {
@@ -57,7 +64,7 @@ public class SecurityUtils {
 
         String username = authentication.getName();
         User user = userRepository.findByEmail(username).orElse(null);
-        return user != null && user.getUserId().equals(userId);
+        return user != null && user.getId().equals(userId);
     }
 
     public boolean isDeveloperOwner(Long developerId) {
@@ -72,8 +79,9 @@ public class SecurityUtils {
             return false;
         }
 
-        Developer developer = developerRepository.findById(developerId).orElse(null);
-        return developer != null && developer.getUser().getDeveloper().equals(user.getUserId());
+        if (user.getUserRole() == UserRole.DEVELOPER) {
+            return user.getId().equals(developerId);
+        }
+        return false;
     }
-
 }

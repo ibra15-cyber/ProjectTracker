@@ -22,6 +22,7 @@ public class Task {
     private String description;
     private TaskStatus status;
     private LocalDateTime createdAt;
+    private LocalDateTime completedOn;
     private LocalDateTime deadline;
 
     @JsonIgnore

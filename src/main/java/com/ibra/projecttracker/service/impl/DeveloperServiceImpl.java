@@ -1,7 +1,10 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.DeveloperDTO;
+import com.ibra.projecttracker.dto.request.DeveloperUpdateDetails;
 import com.ibra.projecttracker.entity.Developer;
+import com.ibra.projecttracker.enums.DevSkills;
+import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.DeveloperRepository;
@@ -10,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,26 +25,37 @@ public class DeveloperServiceImpl implements DeveloperService {
     private final DeveloperRepository developerRepository;
     private final EntityDTOMapper entityDTOMapper;
     private final AuditLogService auditLogService;
+    private final PasswordEncoder passwordEncoder;
 
-    public DeveloperServiceImpl(DeveloperRepository developerRepository, EntityDTOMapper entityDTOMapper, AuditLogService auditLogService) {
+    public DeveloperServiceImpl(DeveloperRepository developerRepository, EntityDTOMapper entityDTOMapper, AuditLogService auditLogService, PasswordEncoder passwordEncoder) {
         this.developerRepository = developerRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.auditLogService = auditLogService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public DeveloperDTO createDeveloper(DeveloperDTO developerDTO) {
-        Developer developer = new Developer();
-        developer.setDeveloperId(developerDTO.getId());
-        developer.setName(developerDTO.getName());
-        developer.setEmail(developerDTO.getEmail());
-        developer.setSkills(developerDTO.getSkill());
+    public Developer createDeveloper(String firstName, String lastName,String email, String rawPassword,
+                                         String phoneNumber,
+                                         DevSkills skill){
+        Developer developer = Developer.builder()
+                .email(email.toLowerCase())
+                .firstName(firstName)
+                .lastName(lastName)
+                .phoneNumber(phoneNumber)
+                .password(passwordEncoder.encode(rawPassword)) // Should be encoded
+                .userRole(UserRole.DEVELOPER)
+                .skill(skill)
+                .build();
+
         Developer savedDeveloper = developerRepository.save(developer);
 
-        auditLogService.logDeveloperCreate(savedDeveloper.getDeveloperId(), savedDeveloper);
+        //TODO WILL REMOVE THIS LATER
+//        auditLogService.logDeveloperCreate(savedDeveloper.getId(), savedDeveloper);
 
-        return entityDTOMapper.mapDeveloperToDeveloperDTO(savedDeveloper);
+        return savedDeveloper;
     }
+
 
     @Override
     public List<DeveloperDTO> getAllDevelopers() {
@@ -62,28 +77,33 @@ public class DeveloperServiceImpl implements DeveloperService {
     }
 
     @Override
-    public DeveloperDTO updateDeveloper(Long developerId, DeveloperDTO developerDTO) {
-        Developer developer = developerRepository.findById(developerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Developer not found!"));
-        if(developerDTO.getName() != null ) developer.setName(developerDTO.getName());
-        if(developerDTO.getEmail() != null ) developer.setEmail(developerDTO.getEmail());
-        if(developerDTO.getSkill() != null) developer.setSkills(developerDTO.getSkill());
-        Developer savedDeveloper = developerRepository.save(developer);
-
-        auditLogService.logDeveloperUpdate(savedDeveloper.getDeveloperId(), developer, savedDeveloper);
-
-        return entityDTOMapper.mapDeveloperToDeveloperDTO(savedDeveloper);
-    }
-
-    @Override
     public void deleteDeveloper(Long developerId) {
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found!"));
 
-        auditLogService.logDeveloperDelete(developer.getDeveloperId(), developer);
+        auditLogService.logDeveloperDelete(developer.getId(), developer);
 
         developerRepository.delete(developer);
     }
+
+
+
+    @Override
+    public Developer updateDeveloper(Long developerId, DeveloperUpdateDetails developerUpdateDetails) {
+        Developer developer = developerRepository.findById(developerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Developer not found!"));
+        if(developerUpdateDetails.getSkill() != null) developer.setSkill(developerUpdateDetails.getSkill());
+
+
+
+        Developer savedDeveloper =  developerRepository.save(developer);
+
+        auditLogService.logUpdate(savedDeveloper.getUserRole().name(), savedDeveloper.getId().toString(), developer, savedDeveloper);
+
+
+        return savedDeveloper;
+    }
+
 
     @Override
     public Page<DeveloperDTO> getDevelopersPageable(int page, int size, String sortBy, String sortDirection) {

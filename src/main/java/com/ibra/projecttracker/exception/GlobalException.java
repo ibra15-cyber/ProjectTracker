@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.exception;
 
 import com.ibra.projecttracker.dto.response.ErrorResponse;
-import com.ibra.projecttracker.service.impl.AuditLogService;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +23,7 @@ import java.util.Map;
 public class GlobalException {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalException.class);
-    private final AuditLogService auditLogService;
 
-    public GlobalException(AuditLogService auditLogService) {
-        this.auditLogService = auditLogService;
-    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
@@ -73,6 +69,7 @@ public class GlobalException {
                 .statusCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
                 .timestamp(System.currentTimeMillis())
                 .build();
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
@@ -84,34 +81,11 @@ public class GlobalException {
                 .statusCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
                 .timestamp(System.currentTimeMillis())
                 .build();
+
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-
-//    @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
-//    public ResponseEntity<ErrorResponse> handleAccessDeniedException(Exception ex, WebRequest request) {
-//        HttpServletRequest httpRequest = ((ServletWebRequest) request).getRequest();
-//
-//        String username = SecurityContextHolder.getContext().getAuthentication() != null ?
-//                SecurityContextHolder.getContext().getAuthentication().getName() :
-//                "anonymous";
-//
-//        auditLogService.saveAuditLog(
-//                AuditLog.unauthorizedAccessLog(
-//                        httpRequest.getRequestURI(),
-//                        httpRequest.getMethod(),
-//                        username
-//                )
-//        );
-//
-//        logger.warn("Access denied: {}", ex.getMessage());
-//        ErrorResponse errorResponse = ErrorResponse.builder()
-//                .errorMessage("Access denied: " + ex.getMessage())
-//                .statusCode(String.valueOf(HttpStatus.FORBIDDEN.value()))
-//                .timestamp(System.currentTimeMillis())
-//                .build();
-//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-//    }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
@@ -163,6 +137,7 @@ public class GlobalException {
                 .statusCode(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
                 .timestamp(System.currentTimeMillis())
                 .build();
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

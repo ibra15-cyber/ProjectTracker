@@ -58,7 +58,6 @@ public class AuditLog {
         this.payload = payload;
     }
 
-    // Getters and Setters
     public String getId() {
         return id;
     }

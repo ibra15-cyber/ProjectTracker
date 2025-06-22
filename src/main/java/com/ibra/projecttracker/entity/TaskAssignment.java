@@ -23,7 +23,7 @@ public class TaskAssignment {
         @ManyToOne
         @JoinColumn(name = "developer_id")
         @ToString.Exclude
-        private Developer developer;
+        private User developer;
 
         private LocalDateTime assignedOn;
 

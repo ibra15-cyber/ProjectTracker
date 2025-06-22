@@ -1,10 +1,10 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.request.AuthRequest;
-import com.ibra.projecttracker.dto.response.AuthResponse;
-import com.ibra.projecttracker.dto.request.UserCreateRequest;
+import com.ibra.projecttracker.dto.response.AuthSuccessResponse;
+import com.ibra.projecttracker.dto.request.UserRegistrationRequest;
 import com.ibra.projecttracker.dto.UserDTO;
-import com.ibra.projecttracker.service.UserService;
+import com.ibra.projecttracker.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -22,36 +22,35 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
-    public AuthController(UserService userService) {
-        this.userService = userService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
-        log.debug(userCreateRequest.toString());
-        UserDTO userDTO = userService.createUser(userCreateRequest);
+    public ResponseEntity<AuthSuccessResponse> createUser(@Valid @RequestBody UserRegistrationRequest userRegistrationRequest) {
+        log.debug(userRegistrationRequest.toString());
+        UserDTO userDTO = authService.createUser(userRegistrationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(buildAuthResponse("User created successfully", HttpStatus.CREATED, userDTO, null));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> loginUser(@Valid @RequestBody AuthRequest authRequest) {
-        Map<String, String> loginResponse = userService.loginUser(authRequest);
+    public ResponseEntity<AuthSuccessResponse> loginUser(@Valid @RequestBody AuthRequest authRequest) {
+        Map<String, String> loginResponse = authService.loginUser(authRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(buildAuthResponse("User logged in successfully", HttpStatus.CREATED, null, loginResponse));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request) {
-        Map<String, String> tokenMap = userService.refreshToken(request);
+    public ResponseEntity<AuthSuccessResponse> refreshToken(HttpServletRequest request) {
+        Map<String, String> tokenMap = authService.refreshToken(request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildAuthResponse("Token refreshed successfully", HttpStatus.OK, null, tokenMap));
     }
 
 
-    private AuthResponse buildAuthResponse(String message, HttpStatus status, UserDTO user, Map<String, String> loginResponse) {
-        return AuthResponse.builder()
+    private AuthSuccessResponse buildAuthResponse(String message, HttpStatus status, UserDTO user, Map<String, String> loginResponse) {
+        return AuthSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .user(user)

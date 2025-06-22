@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -18,11 +17,11 @@ public class Response {
     private List<ProjectDTO> projects;
     private TaskDTO task;
     private List<TaskDTO> tasks;
-    private DeveloperDTO developer;
-    private List<DeveloperDTO> developers;
+    private DeveloperResponseDTO developer;
+    private List<DeveloperResponseDTO> developers;
     private TaskAssignmentDTO taskAssignment;
     private List<TaskAssignmentDTO> taskAssignments;
-    private Page<DeveloperDTO> developerPage;
+    private Page<DeveloperResponseDTO> developerPage;
     private Page<ProjectDTO> projectPage;
 
     private UserDTO user;

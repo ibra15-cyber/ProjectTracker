@@ -6,8 +6,10 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
-public class UserCreateRequest {
+public class UserRegistrationRequest {
     private Long userId;
     private String firstName;
     private String lastName;
@@ -16,5 +18,6 @@ public class UserCreateRequest {
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
-    private DevSkills devSkills;
+    private String userType;
+    private Map<String, Object> details;
 }

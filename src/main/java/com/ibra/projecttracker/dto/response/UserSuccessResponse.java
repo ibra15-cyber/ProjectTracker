@@ -1,6 +1,7 @@
-package com.ibra.projecttracker.dto;
+package com.ibra.projecttracker.dto.response;
 
 
+import com.ibra.projecttracker.dto.UserDTO;
 import lombok.Builder;
 import lombok.Data;
 

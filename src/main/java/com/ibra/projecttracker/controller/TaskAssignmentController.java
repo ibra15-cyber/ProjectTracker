@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
-import com.ibra.projecttracker.dto.response.TaskAssignmentResponse;
+import com.ibra.projecttracker.dto.response.TaskAssignmentSuccessResponse;
 import com.ibra.projecttracker.entity.TaskAssignment;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.service.TaskAssignmentService;
@@ -27,12 +27,12 @@ public class TaskAssignmentController {
     }
 
     // Helper method to build responses
-    private TaskAssignmentResponse buildTaskAssignmentResponse(
+    private TaskAssignmentSuccessResponse buildTaskAssignmentResponse(
             String message,
             HttpStatus status,
             TaskAssignmentDTO taskAssignment,
             List<TaskAssignmentDTO> taskAssignments) {
-        return TaskAssignmentResponse.builder()
+        return TaskAssignmentSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .taskAssignment(taskAssignment)
@@ -42,7 +42,7 @@ public class TaskAssignmentController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<TaskAssignmentResponse> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
+    public ResponseEntity<TaskAssignmentSuccessResponse> createTask(@Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment newTask = taskAssignmentService.createTask(taskAssignmentDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(buildTaskAssignmentResponse(
@@ -54,7 +54,7 @@ public class TaskAssignmentController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<TaskAssignmentResponse> getAllTasks() {
+    public ResponseEntity<TaskAssignmentSuccessResponse> getAllTasks() {
         List<TaskAssignmentDTO> assignmentDTOS = taskAssignmentService.getAllTaskAssignments()
                 .stream()
                 .map(entityDTOMapper::mapTaskAssignmentToDTO)
@@ -69,7 +69,7 @@ public class TaskAssignmentController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER')")
-    public ResponseEntity<TaskAssignmentResponse> getTaskById(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskAssignmentSuccessResponse> getTaskById(@PathVariable("id") Long id) {
         TaskAssignment assignTaskRequest = taskAssignmentService.getTaskAssignmentById(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskAssignmentResponse(
@@ -81,7 +81,7 @@ public class TaskAssignmentController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<TaskAssignmentResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
+    public ResponseEntity<TaskAssignmentSuccessResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskAssignmentDTO taskAssignmentDTO) {
         TaskAssignment updateTask = taskAssignmentService.updateTask(id, taskAssignmentDTO);
         return ResponseEntity.status(HttpStatus.OK).body(buildTaskAssignmentResponse(
                 "Assigned task updated successfully",
@@ -92,7 +92,7 @@ public class TaskAssignmentController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<TaskAssignmentResponse> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskAssignmentSuccessResponse> deleteTask(@PathVariable("id") Long id) {
         taskAssignmentService.deleteTask(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskAssignmentResponse(
@@ -104,7 +104,7 @@ public class TaskAssignmentController {
 
     @GetMapping("/by-developerId/{developerId}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER') or (hasAuthority('DEVELOPER') and @securityUtils.isDeveloperOwner(#developerId))")
-    public ResponseEntity<TaskAssignmentResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
+    public ResponseEntity<TaskAssignmentSuccessResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskAssignmentResponse(

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @Data
-public class TaskResponse {
+public class TaskSuccessResponse {
     private String message;
     private String statusCode;
     private Long timestamp;

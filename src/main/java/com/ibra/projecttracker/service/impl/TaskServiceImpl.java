@@ -3,21 +3,15 @@ package com.ibra.projecttracker.service.impl;
 import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.Project;
 import com.ibra.projecttracker.entity.Task;
-import com.ibra.projecttracker.enums.TaskStatus;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
-import com.ibra.projecttracker.repository.DeveloperRepository;
 import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.service.TaskService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +33,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskDTO createTask(TaskDTO taskDTO) {
         Task newTask = new Task();
         newTask.setTitle(taskDTO.getTitle());

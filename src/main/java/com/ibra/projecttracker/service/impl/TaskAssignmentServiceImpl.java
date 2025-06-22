@@ -1,18 +1,14 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
-import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.entity.TaskAssignment;
+import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
-import com.ibra.projecttracker.repository.DeveloperRepository;
-import com.ibra.projecttracker.repository.ProjectRepository;
-import com.ibra.projecttracker.repository.TaskAssignmentRepository;
-import com.ibra.projecttracker.repository.TaskRepository;
+import com.ibra.projecttracker.repository.*;
 import com.ibra.projecttracker.service.TaskAssignmentService;
-import com.ibra.projecttracker.service.TaskService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,13 +22,15 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     private final DeveloperRepository developerRepository;
     private final TaskAssignmentRepository taskAssignmentRepository;
     private final AuditLogService auditLogService;
+    private final UserRepository userRepository;
 
-    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, DeveloperRepository developerRepository,TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService) {
+    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, DeveloperRepository developerRepository, TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService, UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.developerRepository = developerRepository;
         this.taskAssignmentRepository = taskAssignmentRepository;
         this.auditLogService = auditLogService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                 .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
         taskAssignment.setTask(task);
 
-        Developer developer = developerRepository.findById(taskAssignmentDTO.getDeveloperId())
+        User developer = userRepository.findById(taskAssignmentDTO.getDeveloperId())
                 .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
         taskAssignment.setDeveloper(developer);
 
@@ -113,9 +111,5 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public boolean isTaskAssignedToDeveloperUser(Long taskId, Long userId) {
-        return taskAssignmentRepository.existsByTaskAndDeveloperUserNative(taskId, userId); // For Native Query option
-    }
 
 }

@@ -1,6 +1,6 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.response.TaskResponse;
+import com.ibra.projecttracker.dto.response.TaskSuccessResponse;
 import com.ibra.projecttracker.dto.TaskDTO;
 import com.ibra.projecttracker.service.TaskService;
 import jakarta.validation.Valid;
@@ -21,12 +21,12 @@ public class TaskController {
     }
 
     // Helper method to build responses
-    private TaskResponse buildTaskResponse(
+    private TaskSuccessResponse buildTaskResponse(
             String message,
             HttpStatus status,
             TaskDTO task,
             List<TaskDTO> tasks) {
-        return TaskResponse.builder()
+        return TaskSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .task(task)
@@ -36,7 +36,7 @@ public class TaskController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGER')")
-    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<TaskSuccessResponse> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO newTask = taskService.createTask(taskDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(buildTaskResponse(
@@ -48,7 +48,7 @@ public class TaskController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<TaskResponse> getAllTasks() {
+    public ResponseEntity<TaskSuccessResponse> getAllTasks() {
         List<TaskDTO> taskDTOs = taskService.getAllTasks();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskResponse(
@@ -60,7 +60,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'DEVELOPER')")
-    public ResponseEntity<TaskResponse> getTaskById(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskSuccessResponse> getTaskById(@PathVariable("id") Long id) {
         TaskDTO taskDTO = taskService.getTaskById(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskResponse(
@@ -71,8 +71,8 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or (hasAnyAuthority('DEVELOPER') and @securityUtils.isTaskOwner(#id))")
-    public ResponseEntity<TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
+    @PreAuthorize("(@SecurityUtils.isTaskOwner(#id) and hasAnyAuthority('DEVELOPER')) or hasAuthority('ADMIN')")
+    public ResponseEntity<TaskSuccessResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO updateTask = taskService.updateTask(id, taskDTO);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskResponse(
@@ -84,7 +84,7 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<TaskResponse> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<TaskSuccessResponse> deleteTask(@PathVariable("id") Long id) {
         taskService.deleteTask(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskResponse(
@@ -95,7 +95,7 @@ public class TaskController {
     }
 
     @GetMapping("/by-projectId/{projectId}")
-    public ResponseEntity<TaskResponse> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
+    public ResponseEntity<TaskSuccessResponse> getTasksByProjectId(@PathVariable("projectId") Long projectId) {
         List<TaskDTO> projectDTOS = taskService.getTasksByProjectId(projectId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskResponse(
@@ -106,7 +106,7 @@ public class TaskController {
     }
 
     @GetMapping("/sort")
-    public ResponseEntity<TaskResponse> getAllTasks(
+    public ResponseEntity<TaskSuccessResponse> getAllTasks(
             @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
 
@@ -120,7 +120,7 @@ public class TaskController {
     }
 
     @GetMapping("/overdue")
-    public ResponseEntity<TaskResponse> getOverdueTasks() {
+    public ResponseEntity<TaskSuccessResponse> getOverdueTasks() {
         List<TaskDTO> taskDTOS = taskService.findOverdueTasks();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskResponse(

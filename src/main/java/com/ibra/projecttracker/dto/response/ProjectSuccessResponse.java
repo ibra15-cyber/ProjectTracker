@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 @Data
-public class ProjectResponse {
+public class ProjectSuccessResponse {
     private String message;
     private String statusCode;
     private Long timestamp;

@@ -1,30 +1,27 @@
 package com.ibra.projecttracker.service.impl;
 
-import com.ibra.projecttracker.dto.request.AuthRequest;
-import com.ibra.projecttracker.dto.request.UserCreateRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibra.projecttracker.dto.UserDTO;
+import com.ibra.projecttracker.dto.request.AdminUpdateDetails;
+import com.ibra.projecttracker.dto.request.DeveloperUpdateDetails;
+import com.ibra.projecttracker.dto.request.ManagerUpdateDetails;
+import com.ibra.projecttracker.dto.request.UpdateUserRequest;
 import com.ibra.projecttracker.entity.*;
-import com.ibra.projecttracker.exception.InvalidCredentialException;
-import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.*;
-import com.ibra.projecttracker.security.AuthUser;
-import com.ibra.projecttracker.security.jwt.JwtUtils;
+import com.ibra.projecttracker.service.AdminService;
+import com.ibra.projecttracker.service.DeveloperService;
+import com.ibra.projecttracker.service.ManagerService;
 import com.ibra.projecttracker.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,149 +29,22 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EntityDTOMapper entityDTOMapper;
-    private final JwtUtils jwtUtils;
-    private final PasswordEncoder passwordEncoder;
+    private final DeveloperService developerService;
+    private final ObjectMapper objectMapper;
     private final AuditLogService auditLogService;
-    private final DeveloperRepository developerRepository;
-    private final AdminRepository adminRepository;
-    private final ManagerRepository managerRepository;
-    private final ContractorRepository contractorRepository;
-    private final AuthenticationManager authenticationManager;
+    private final AdminService adminService;
+    private final ManagerService managerService;
 
-    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils, AuditLogService auditLogService, DeveloperRepository developerRepository, AdminRepository adminRepository, DeveloperRepository developerRepository1, AdminRepository adminRepository1, ManagerRepository managerRepository, ContractorRepository contractorRepository, AuthenticationManager authenticationManager) {
-        this.passwordEncoder = passwordEncoder;
+    public UserServiceImpl(UserRepository userRepository, EntityDTOMapper entityDTOMapper, DeveloperService developerService, ObjectMapper objectMapper, AuditLogService auditLogService, AdminService adminService, ManagerService managerService) {
         this.userRepository = userRepository;
         this.entityDTOMapper = entityDTOMapper;
-        this.jwtUtils = jwtUtils;
+        this.developerService = developerService;
+        this.objectMapper = objectMapper;
         this.auditLogService = auditLogService;
-        this.developerRepository = developerRepository1;
-        this.adminRepository = adminRepository1;
-        this.managerRepository = managerRepository;
-        this.contractorRepository = contractorRepository;
-        this.authenticationManager = authenticationManager;
+        this.adminService = adminService;
+        this.managerService = managerService;
     }
 
-    @Override
-    public UserDTO createUser(UserCreateRequest userCreateRequest) {
-        User newUser = User.builder()
-                .firstName(userCreateRequest.getFirstName())
-                .lastName(userCreateRequest.getLastName())
-                .email(userCreateRequest.getEmail())
-                .password(passwordEncoder.encode(userCreateRequest.getPassword()))
-                .phoneNumber(userCreateRequest.getPhoneNumber())
-                .userRole(userCreateRequest.getUserRole())
-                .build();
-
-        User savedUser = userRepository.save(newUser);
-        if (savedUser.getUserRole().name().equals("DEVELOPER")) {
-            Developer developer = new Developer();
-            developer.setDeveloperId(savedUser.getUserId());
-            developer.setUser(savedUser);
-            developer.setName(userCreateRequest.getFirstName() + " " + userCreateRequest.getLastName());
-            developer.setEmail(userCreateRequest.getEmail());
-            developer.setSkills(userCreateRequest.getDevSkills());
-
-            developerRepository.save(developer);
-        } else if (savedUser.getUserRole().name().equals("ADMIN")) {
-            Admin admin = new Admin();
-            admin.setAdminId(savedUser.getUserId());
-            admin.setUser(savedUser);
-            adminRepository.save(admin);
-        } else if (savedUser.getUserRole().name().equals("MANAGER")) {
-            Manager manager = new Manager();
-            manager.setMangerId(savedUser.getUserId());
-            manager.setUser(savedUser);
-            managerRepository.save(manager);
-        } else {
-            Contractor contractor = new Contractor();
-            contractor.setContractorId(savedUser.getUserId());
-            contractor.setUser(savedUser);
-            contractorRepository.save(contractor);
-        }
-
-        return entityDTOMapper.mapUserToUserDTO(savedUser);
-    }
-
-    @Override
-    public Map<String, String> loginUser(AuthRequest authRequest) {
-        log.info("Attempting to login user with email: {}", authRequest.email());
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password())
-            );
-
-            AuthUser authUser = (AuthUser) authentication.getPrincipal();
-            User user = authUser.getUser();
-            log.info("Authentication successful for user: {}", user.getEmail());
-
-            // Generate JWT token and refresh token
-            String token = jwtUtils.generateToken(user.getEmail());
-            String refreshToken = jwtUtils.generateRefreshToken(authRequest.email());
-
-            Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(token);
-            Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(refreshToken);
-
-            user.setRefreshedToken(refreshToken);
-            userRepository.save(user); // Save the refresh token to the user
-
-            return Map.of(
-                    "accessToken", token,
-                    "refreshToken", refreshToken,
-                    "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
-                    "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
-                    "userRole", user.getUserRole().name(),
-                    "email", user.getEmail()
-            );
-
-        } catch (UsernameNotFoundException e) {
-            log.warn("Login failed: User not found for email: {}", authRequest.email());
-            auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "User not found"));
-            throw new ResourceNotFoundException("User not found or invalid credentials."); // Or re-throw UsernameNotFoundException if preferred
-        } catch (BadCredentialsException e) {
-            log.warn("Login failed: Invalid password for email: {}", authRequest.email());
-            auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "Invalid password"));
-            throw new InvalidCredentialException("Wrong password or invalid credentials.");
-        } catch (Exception e) {
-            log.error("An unexpected error occurred during login for email {}: {}", authRequest.email(), e.getMessage());
-            auditLogService.saveAuditLog(AuditLog.loginFailedLog(authRequest.email(), "Internal server error during authentication"));
-            throw new RuntimeException("An unexpected error occurred during login.", e);
-        }
-    }
-
-    @Override
-    public Map<String, String> refreshToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-            throw new InvalidTokenException("Refresh token must be provided in Authorization header with Bearer prefix");
-        }
-
-        String refreshToken = bearerToken.substring(7);
-
-        String email = jwtUtils.getUsernameFromToken(refreshToken);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        if (!refreshToken.equals(user.getRefreshedToken())) {
-            throw new InvalidTokenException("Invalid refresh token");
-        }
-
-        String newAccessToken = jwtUtils.generateToken(user.getEmail());
-        String newRefreshToken = jwtUtils.generateRefreshToken(user.getEmail());
-
-        Map<String, Long> accessTokenTime = jwtUtils.getTokenTimeDetails(newAccessToken);
-        Map<String, Long> refreshTokenTime = jwtUtils.getTokenTimeDetails(newRefreshToken);
-
-        user.setRefreshedToken(newRefreshToken);
-        userRepository.save(user);
-
-        return Map.of(
-                "accessToken", newAccessToken,
-                "refreshToken", newRefreshToken,
-                "accessTokenExpiresIn", String.valueOf(accessTokenTime.get("remainingTimeMs") / 1000),
-                "refreshTokenExpiresIn", String.valueOf(refreshTokenTime.get("remainingTimeMs") / 1000),
-                "userRole", user.getUserRole().name()
-        );
-    }
 
     @Override
     public List<UserDTO> getAllUsers() {
@@ -189,20 +59,47 @@ public class UserServiceImpl implements UserService {
     public UserDTO getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        auditLogService.logRead(user.getUserRole().toString(), user.getId().toString());
+
         return entityDTOMapper.mapUserToUserDTO(user);
     }
 
     @Override
-    public UserDTO updateUser(Long userId, UserDTO userDTO) {
+    @Transactional
+    public UserDTO updateUser(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (userDTO.firstName() != null) user.setFirstName(userDTO.firstName());
-        if (userDTO.lastName() != null) user.setLastName(userDTO.lastName());
-        if (userDTO.email() != null) user.setEmail(userDTO.email());
-        if (userDTO.phoneNumber() != null) user.setPhoneNumber(userDTO.phoneNumber());
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        if (request.getEmail() != null) user.setEmail(request.getEmail().toLowerCase());
+        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
 
         User updatedUser = userRepository.save(user);
+
+//        auditLogService.logDeveloperUpdate(user.getId(), user, updatedUser);
+
+
+        if (request.getDetails() != null && !request.getDetails().isEmpty()) {
+            if (updatedUser instanceof Developer) {
+                DeveloperUpdateDetails devUpdateDTO = objectMapper.convertValue(
+                        request.getDetails(), DeveloperUpdateDetails.class);
+                developerService.updateDeveloper(userId, devUpdateDTO); // Pass the original userId
+            } else if (updatedUser instanceof Admin) {
+                AdminUpdateDetails adminUpdateDTO = objectMapper.convertValue(
+                        request.getDetails(), AdminUpdateDetails.class);
+                adminService.updateAdmin(userId, adminUpdateDTO);
+                log.warn("Attempted to update Admin-specific details for user ID {} but AdminService.updateAdmin is not yet implemented or wired.", userId);
+            }
+            if (updatedUser instanceof Manager) {
+                ManagerUpdateDetails managerUpdateDTO = objectMapper.convertValue(
+                        request.getDetails(), ManagerUpdateDetails.class);
+                managerService.updateManager(userId, managerUpdateDTO);
+                log.warn("Attempted to update Manager-specific details for user ID {} but ManagerService.updateManager is not yet implemented or wired.", userId);
+
+            }
+        }
 
         return entityDTOMapper.mapUserToUserDTO(updatedUser);
     }
@@ -212,8 +109,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+
         userRepository.delete(user);
+
+        auditLogService.logDeveloperDelete(user.getId(), user);
     }
+
 
     @Override
     public UserDTO getLoginUser() {

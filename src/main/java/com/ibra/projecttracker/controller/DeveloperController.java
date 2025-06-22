@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.controller;
 
-import com.ibra.projecttracker.dto.response.DeveloperResponse;
 import com.ibra.projecttracker.dto.DeveloperDTO;
+import com.ibra.projecttracker.dto.response.DeveloperSuccessResponse;
 import com.ibra.projecttracker.service.DeveloperService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +23,13 @@ public class DeveloperController {
         this.developerService = developerService;
     }
 
-    private DeveloperResponse buildDeveloperResponse(
+    private DeveloperSuccessResponse buildDeveloperResponse(
             String message,
             HttpStatus status,
             DeveloperDTO developer,
             List<DeveloperDTO> developers,
             Page<DeveloperDTO> developerPage) {
-        return DeveloperResponse.builder()
+        return DeveloperSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .developer(developer)
@@ -38,22 +38,10 @@ public class DeveloperController {
                 .build();
     }
 
-    @PostMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<DeveloperResponse> createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
-        DeveloperDTO newDeveloper = developerService.createDeveloper(developerDTO);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(buildDeveloperResponse(
-                        "Developer created successfully",
-                        HttpStatus.CREATED,
-                        newDeveloper,
-                        null,
-                        null));
-    }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<DeveloperResponse> getAllDevelopers() {
+    public ResponseEntity<DeveloperSuccessResponse> getAllDevelopers() {
         List<DeveloperDTO> developerDTOs = developerService.getAllDevelopers();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildDeveloperResponse(
@@ -64,9 +52,10 @@ public class DeveloperController {
                         null));
     }
 
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<DeveloperResponse> getDeveloperById(@Valid @PathVariable("id") Long id) {
+    public ResponseEntity<DeveloperSuccessResponse> getDeveloperById(@Valid @PathVariable("id") Long id) {
         DeveloperDTO developerDTO = developerService.getDeveloperById(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildDeveloperResponse(
@@ -77,22 +66,10 @@ public class DeveloperController {
                         null));
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<DeveloperResponse> updateDeveloper(@PathVariable("id") Long id, @Valid @RequestBody DeveloperDTO developerDTO) {
-        DeveloperDTO updateDeveloper = developerService.updateDeveloper(id, developerDTO);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(buildDeveloperResponse(
-                        "Developer updated successfully",
-                        HttpStatus.OK,
-                        updateDeveloper,
-                        null,
-                        null));
-    }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<DeveloperResponse> deleteDeveloper(@PathVariable("id") Long id) {
+    public ResponseEntity<DeveloperSuccessResponse> deleteDeveloper(@PathVariable("id") Long id) {
         developerService.deleteDeveloper(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildDeveloperResponse(
@@ -102,10 +79,9 @@ public class DeveloperController {
                         null,
                         null));
     }
-
     @GetMapping("/paginated")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<DeveloperResponse> getDeveloperPageable(
+    public ResponseEntity<DeveloperSuccessResponse> getDeveloperPageable(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "developerId") String sortBy,
@@ -121,16 +97,18 @@ public class DeveloperController {
                         developersPage));
     }
 
-    @GetMapping("/developers/top5")
+
+
+    @GetMapping("/top5")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    public ResponseEntity<DeveloperResponse> getTop5Developers() {
-        List<DeveloperDTO> developerDTOs = developerService.findTop5DevelopersWithMostTasksAssigned();
+    public ResponseEntity<DeveloperSuccessResponse> getTop5Developers() {
+        List<DeveloperDTO> developerResponseDTOS = developerService.findTop5DevelopersWithMostTasksAssigned();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildDeveloperResponse(
                         "Top 5 developers retrieved successfully",
                         HttpStatus.OK,
                         null,
-                        developerDTOs,
+                        developerResponseDTOS,
                         null));
     }
 }

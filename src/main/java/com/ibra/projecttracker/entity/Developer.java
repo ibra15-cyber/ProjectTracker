@@ -1,36 +1,39 @@
 package com.ibra.projecttracker.entity;
 
 import com.ibra.projecttracker.enums.DevSkills;
+import com.ibra.projecttracker.enums.UserRole;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.experimental.SuperBuilder;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
-import java.util.Set;
+import java.util.List;
 
-@Data
 @Entity
-@Table(name="developers")
-@ToString(exclude = {"taskAssignments"})
-public class Developer {
-    @Id
-    private Long developerId;
+@Table(name = "developers")
+@PrimaryKeyJoinColumn(name = "user_id")
+@DiscriminatorValue("DEVELOPER")
 
-    @Size(min = 3, max = 50)
-    private String name;
-    @Email
-    private String email;
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+public class Developer extends User {
+    @Enumerated(EnumType.STRING)
+    private DevSkills skill;
 
-    private DevSkills skills;
+    @OneToMany(mappedBy = "developer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TaskAssignment> taskAssignments;
 
-    @OneToMany(mappedBy = "developer")
-    private Set<TaskAssignment> taskAssignments;
-
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
-    private User user;
-
+    public Developer(String firstName, String lastName, String password, String email, String phoneNumber,
+                     DevSkills skill) {
+        super(password, email, phoneNumber, firstName, lastName, UserRole.DEVELOPER);
+        this.skill = skill;
+    }
 }

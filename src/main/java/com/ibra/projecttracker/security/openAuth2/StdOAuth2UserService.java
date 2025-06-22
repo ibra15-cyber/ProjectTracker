@@ -53,7 +53,9 @@ public class StdOAuth2UserService extends DefaultOAuth2UserService {
         User user = new User();
         user.setEmail(oauth2User.getAttribute("login") + "@github.com");
         user.setFirstName(oauth2User.getAttribute("login"));
+        user.setLastName(oauth2User.getAttribute("login"));
         user.setUserRole(UserRole.CONTRACTOR);
+        user.setPassword(UUID.randomUUID().toString());
 
         log.info("user found or created: {}", user);
         return userRepository.save(user);
