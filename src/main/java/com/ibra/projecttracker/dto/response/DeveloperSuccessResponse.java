@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.dto.response;
 
 
-import com.ibra.projecttracker.dto.DeveloperDTO;
+import com.ibra.projecttracker.dto.DeveloperResponseDTO;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -15,8 +15,8 @@ public class DeveloperResponse {
     private String statusCode;
     private Long timestamp;
 
-    private DeveloperDTO developer;
-    private List<DeveloperDTO> developers;
+    private DeveloperResponseDTO developer;
+    private List<DeveloperResponseDTO> developers;
 
-    private Page<DeveloperDTO> developerPage;
+    private Page<DeveloperResponseDTO> developerPage;
 }
