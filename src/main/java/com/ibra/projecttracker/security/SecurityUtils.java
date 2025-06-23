@@ -1,8 +1,10 @@
 package com.ibra.projecttracker.security;
 
+import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.enums.UserRole;
+import com.ibra.projecttracker.repository.DeveloperRepository;
 import com.ibra.projecttracker.repository.UserRepository;
 import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.repository.TaskAssignmentRepository;
@@ -17,11 +19,13 @@ public class SecurityUtils {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final TaskAssignmentRepository taskAssignmentRepository; // NEW INJECTION
+    private final DeveloperRepository developerRepository;
 
-    public SecurityUtils(UserRepository userRepository, TaskRepository taskRepository, TaskAssignmentRepository taskAssignmentRepository) {
+    public SecurityUtils(UserRepository userRepository, TaskRepository taskRepository, TaskAssignmentRepository taskAssignmentRepository, DeveloperRepository developerRepository) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.taskAssignmentRepository = taskAssignmentRepository;
+        this.developerRepository = developerRepository;
     }
 
     public boolean isTaskOwner(Long taskId) {
@@ -74,13 +78,13 @@ public class SecurityUtils {
         }
 
         String username = authentication.getName();
-        User user = userRepository.findByEmail(username).orElse(null);
-        if (user == null) {
+        Developer developer = developerRepository.findByEmail(username).orElse(null);
+        if (developer == null) {
             return false;
         }
 
-        if (user.getUserRole() == UserRole.DEVELOPER) {
-            return user.getId().equals(developerId);
+        if (developer.getUserRole() == UserRole.DEVELOPER) {
+            return developer.getId().equals(developerId);
         }
         return false;
     }

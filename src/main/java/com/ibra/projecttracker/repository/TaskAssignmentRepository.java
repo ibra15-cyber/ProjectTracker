@@ -25,5 +25,6 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
     boolean existsByTaskAndDeveloper(Task task, User developer);
 
+
 }
 

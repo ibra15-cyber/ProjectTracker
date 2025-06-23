@@ -102,8 +102,8 @@ public class TaskAssignmentController {
                         null));
     }
 
-    @GetMapping("/by-developerId/{developerId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER') or (hasAuthority('DEVELOPER') and @securityUtils.isDeveloperOwner(#developerId))")
+    @GetMapping("/by-developer/{developerId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER') or (hasAuthority('DEVELOPER') and @SecurityUtils.isDeveloperOwner(#developerId))")
     public ResponseEntity<TaskAssignmentSuccessResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
         List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
         return ResponseEntity.status(HttpStatus.OK)

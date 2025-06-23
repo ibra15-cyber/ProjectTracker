@@ -5,7 +5,9 @@ import com.ibra.projecttracker.enums.DevSkills;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.ToString;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -20,5 +22,4 @@ public class DeveloperDTO {
 
     private DevSkills skill;
 
-    private Set<TaskAssignment> taskAssignment;
 }
