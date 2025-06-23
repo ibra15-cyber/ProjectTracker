@@ -20,7 +20,9 @@ public class TaskAssignmentDTO {
     private Long developerId;
     private String developerName;
 
-    private LocalDateTime assignedOn; // This will be set automatically in service
+    private String assignedBy;
+
+    private LocalDateTime assignedOn;
 
     private TaskAssignmentStatus status;
 

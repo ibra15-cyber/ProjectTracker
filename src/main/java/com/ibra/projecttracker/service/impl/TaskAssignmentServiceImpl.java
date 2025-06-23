@@ -8,7 +8,10 @@ import com.ibra.projecttracker.entity.User;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.*;
+import com.ibra.projecttracker.service.AuthService;
 import com.ibra.projecttracker.service.TaskAssignmentService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,14 +26,16 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     private final TaskAssignmentRepository taskAssignmentRepository;
     private final AuditLogService auditLogService;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, DeveloperRepository developerRepository, TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService, UserRepository userRepository) {
+    public TaskAssignmentServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, DeveloperRepository developerRepository, TaskAssignmentRepository taskAssignmentRepository, AuditLogService auditLogService, UserRepository userRepository, AuthService authService) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.developerRepository = developerRepository;
         this.taskAssignmentRepository = taskAssignmentRepository;
         this.auditLogService = auditLogService;
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     @Override
@@ -41,9 +46,13 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                 .orElseThrow(()-> new ResourceNotFoundException("Task not found"));
         taskAssignment.setTask(task);
 
-        User developer = userRepository.findById(taskAssignmentDTO.getDeveloperId())
+        Developer developer = developerRepository.findById(taskAssignmentDTO.getDeveloperId())
                 .orElseThrow(()-> new ResourceNotFoundException("Developer not found"));
         taskAssignment.setDeveloper(developer);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User assignedBy = userRepository.findByEmail(auth.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        taskAssignment.setAssignedBy(assignedBy);
 
         taskAssignment.setStatus(taskAssignmentDTO.getStatus());
         taskAssignment.setAssignedOn(LocalDateTime.now());

@@ -38,8 +38,6 @@ public class User implements Serializable {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-
-
     @Column(name = "refresh_token")
     private String refreshToken;
 

@@ -31,9 +31,9 @@ public class SecurityUtils {
         }
 
         String currentUsername = auth.getName();
-        User currentUser = userRepository.findByEmail(currentUsername).orElse(null);
+        User currentDeveloper = userRepository.findByEmail(currentUsername).orElse(null);
 
-        if (currentUser == null) {
+        if (currentDeveloper == null) {
             return false;
         }
 
@@ -43,7 +43,7 @@ public class SecurityUtils {
             return false;
         }
 
-        boolean result = taskAssignmentRepository.existsByTaskAndDeveloper(task, currentUser);
+        boolean result = taskAssignmentRepository.existsByTaskAndDeveloper(task, currentDeveloper);
         return result;
     }
 

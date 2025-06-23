@@ -23,9 +23,13 @@ public class TaskAssignment {
         @ManyToOne
         @JoinColumn(name = "developer_id")
         @ToString.Exclude
-        private User developer;
+        private Developer developer;
 
         private LocalDateTime assignedOn;
+
+        @ManyToOne
+        @JoinColumn(name = "user_id")
+        private User assignedBy;
 
         private TaskAssignmentStatus status;
 

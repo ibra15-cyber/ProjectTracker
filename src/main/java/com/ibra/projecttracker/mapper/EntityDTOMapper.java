@@ -75,6 +75,7 @@ public class EntityDTOMapper {
         dto.setTaskTitle(taskAssignment.getTask().getTitle());
         dto.setDeveloperId(taskAssignment.getDeveloper().getId());
         dto.setDeveloperName(taskAssignment.getDeveloper().getFirstName() + " " + taskAssignment.getDeveloper().getLastName());
+        dto.setAssignedBy(taskAssignment.getAssignedBy().getFirstName() + " " + taskAssignment.getAssignedBy().getLastName());
         dto.setAssignedOn(taskAssignment.getAssignedOn());
         dto.setStatus(taskAssignment.getStatus());
         dto.setDeadline(taskAssignment.getDeadline());
