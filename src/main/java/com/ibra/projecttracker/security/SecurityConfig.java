@@ -1,7 +1,7 @@
 package com.ibra.projecttracker.security;
 
-import com.ibra.projecttracker.exception.CustomAccessDeniedHandler;
-import com.ibra.projecttracker.exception.CustomAuthenticationEntryPoint;
+import com.ibra.projecttracker.exception.security.CustomAccessDeniedHandler;
+import com.ibra.projecttracker.exception.security.CustomAuthenticationEntryPoint;
 import com.ibra.projecttracker.security.jwt.JwtAuthFilter;
 import com.ibra.projecttracker.security.openAuth2.OAuth2LoginSuccessHandler;
 import com.ibra.projecttracker.security.openAuth2.OidOAuth2UserService;
