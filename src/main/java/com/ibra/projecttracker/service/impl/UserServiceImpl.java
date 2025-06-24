@@ -78,8 +78,6 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = userRepository.save(user);
 
-//        auditLogService.logDeveloperUpdate(user.getId(), user, updatedUser);
-
 
         if (request.getDetails() != null && !request.getDetails().isEmpty()) {
             if (updatedUser instanceof Developer) {

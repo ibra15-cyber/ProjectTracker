@@ -51,27 +51,6 @@ public class DeveloperServiceImpl implements DeveloperService {
         return developerRepository.save(developer);
     }
 
-    //can still create user from the /developer route refactor from master branch keep here for learning
-    @Override
-    public DeveloperDTO createDeveloper(DeveloperRegistrationRequest request) {
-        Developer developer = Developer.builder()
-                .email(request.getEmail().toLowerCase())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .phoneNumber(request.getPhoneNumber())
-                .password(passwordEncoder.encode(request.getPassword())) // Should be encoded
-                .userRole(UserRole.DEVELOPER)
-                .skill(request.getSkill())
-                .build();
-
-        Developer savedDeveloper = developerRepository.save(developer);
-
-        auditLogService.logDeveloperCreate(savedDeveloper.getId(), savedDeveloper);
-
-        return entityDTOMapper.mapDeveloperToDeveloperDTO(savedDeveloper);
-    }
-
-
     @Override
     public List<DeveloperDTO> getAllDevelopers() {
         List<Developer> developers = developerRepository.findAll();

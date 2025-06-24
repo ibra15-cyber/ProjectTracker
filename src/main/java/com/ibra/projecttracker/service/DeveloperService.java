@@ -22,6 +22,4 @@ public interface DeveloperService {
 
     DeveloperDTO getDeveloperById(Long developerId);
     void deleteDeveloper(Long developerId);
-    DeveloperDTO createDeveloper(DeveloperRegistrationRequest request);
-
 }

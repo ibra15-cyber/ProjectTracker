@@ -40,19 +40,6 @@ public class DeveloperController {
                 .build();
     }
 
-    @PostMapping
-    public ResponseEntity<DeveloperSuccessResponse> createDeveloper(@Valid @RequestBody DeveloperRegistrationRequest request) {
-        System.out.println("Creating developer with request: " + request);
-        DeveloperDTO newDeveloper = developerService.createDeveloper(request);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(buildDeveloperResponse(
-                        "Developer retrieved successfully",
-                        HttpStatus.OK,
-                        newDeveloper,
-                        null,
-                        null));
-    }
-
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<DeveloperSuccessResponse> getAllDevelopers() {
