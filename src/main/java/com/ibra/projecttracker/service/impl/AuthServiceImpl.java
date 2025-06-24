@@ -1,29 +1,31 @@
 package com.ibra.projecttracker.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibra.projecttracker.dto.UserDTO;
 import com.ibra.projecttracker.dto.request.*;
 import com.ibra.projecttracker.entity.*;
+import com.ibra.projecttracker.enums.UserRole;
 import com.ibra.projecttracker.exception.InvalidCredentialException;
 import com.ibra.projecttracker.exception.InvalidTokenException;
 import com.ibra.projecttracker.exception.ResourceNotFoundException;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
+import com.ibra.projecttracker.utility.registration.UserRegistrar;
 import com.ibra.projecttracker.repository.*;
 import com.ibra.projecttracker.security.AuthUser;
 import com.ibra.projecttracker.security.jwt.JwtUtils;
-import com.ibra.projecttracker.service.AdminService;
 import com.ibra.projecttracker.service.AuthService;
-import com.ibra.projecttracker.service.DeveloperService;
-import com.ibra.projecttracker.service.ManagerService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,21 +35,20 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final AuditLogService auditLogService;
     private final AuthenticationManager authenticationManager;
-    private final DeveloperService developerService;
-    private final ObjectMapper objectMapper;
-    private final AdminService adminService;
-    private final ManagerService managerService;
+    private final Map<UserRole, UserRegistrar> userRegistrars;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserRepository userRepository, EntityDTOMapper entityDTOMapper, JwtUtils jwtUtils, AuditLogService auditLogService, AuthenticationManager authenticationManager, DeveloperService developerService, ObjectMapper objectMapper, AdminService adminService, ManagerService managerService) {
+    public AuthServiceImpl(UserRepository userRepository, EntityDTOMapper entityDTOMapper,
+                           JwtUtils jwtUtils, AuditLogService auditLogService, AuthenticationManager authenticationManager,
+                           PasswordEncoder passwordEncoder, List<UserRegistrar> registrars ) {
         this.userRepository = userRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.jwtUtils = jwtUtils;
         this.auditLogService = auditLogService;
         this.authenticationManager = authenticationManager;
-        this.developerService = developerService;
-        this.objectMapper = objectMapper;
-        this.adminService = adminService;
-        this.managerService = managerService;
+        this.passwordEncoder = passwordEncoder;
+        this.userRegistrars = registrars.stream()
+                .collect(Collectors.toMap(UserRegistrar::getUserRole, Function.identity()));
     }
 
 
@@ -63,46 +64,18 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Email already registered");
         }
 
-        User createdUser = switch (request.getUserType()) {
-            case "DEVELOPER" -> {
-                DeveloperRegistrationDetails devDetails = objectMapper.convertValue(
-                        request.getDetails(), DeveloperRegistrationDetails.class);
-                yield developerService.createDeveloper(
-                        request.getFirstName(),
-                        request.getLastName(),
-                        request.getEmail(),
-                        request.getPassword().toLowerCase(),
-                        request.getPhoneNumber(),
-                        devDetails.getSkill()
-                );
-            }
-            case "ADMIN" -> {
-                AdminRegistrationDetails adminDetails = objectMapper.convertValue(
-                        request.getDetails(), AdminRegistrationDetails.class);
-                yield adminService.createAdmin(
-                        request.getFirstName(),
-                        request.getLastName(),
-                        request.getEmail(),
-                        request.getPassword().toLowerCase(),
-                        request.getPhoneNumber(),
-                        adminDetails.getAdminLevel()
-                );
-            }
-            case "MANAGER" -> {
-                ManagerRegistrationDetails managerDetails = objectMapper.convertValue(
-                        request.getDetails(), ManagerRegistrationDetails.class);
-                yield managerService.createManager(
-                        request.getFirstName(),
-                        request.getLastName(),
-                        request.getEmail(),
-                        request.getPassword().toLowerCase(),
-                        request.getPhoneNumber(),
-                        managerDetails.getDepartment()
-
-                );
-            }
-            default -> throw new IllegalArgumentException("Unsupported user type: " + request.getUserType());
-        };
+        UserRegistrar registrar = userRegistrars.get(request.getUserRole());
+        if (registrar == null) {
+            throw new IllegalArgumentException("Unsupported user type: " + request.getUserType());
+        }
+        User createdUser = registrar.register(
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getPhoneNumber(),
+                request.getDetails()
+        );
 
         auditLogService.logCreate(createdUser.getUserRole().name(), createdUser.getId().toString(), createdUser);
 

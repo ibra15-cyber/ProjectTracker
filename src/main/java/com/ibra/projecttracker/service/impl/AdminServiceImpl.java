@@ -34,14 +34,13 @@ public class AdminServiceImpl implements AdminService {
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
-                .password(passwordEncoder.encode(rawPassword)) // Should be encoded
+                .password(passwordEncoder.encode(rawPassword))
                 .userRole(UserRole.ADMIN)
                 .adminLevel(adminLevel)
                 .build();
 
         Admin savedAdmin = adminRepository.save(admin);
 
-        //TODO : to be handled in the user service
         auditLogService.logDeveloperCreate(savedAdmin.getId(), savedAdmin);
 
         return savedAdmin;

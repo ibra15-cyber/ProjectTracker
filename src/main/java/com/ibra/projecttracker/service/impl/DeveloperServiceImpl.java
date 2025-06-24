@@ -1,6 +1,7 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.DeveloperDTO;
+import com.ibra.projecttracker.dto.request.DeveloperRegistrationRequest;
 import com.ibra.projecttracker.dto.request.DeveloperUpdateDetails;
 import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.enums.DevSkills;
@@ -34,26 +35,40 @@ public class DeveloperServiceImpl implements DeveloperService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
-    public Developer createDeveloper(String firstName, String lastName,String email, String rawPassword,
-                                         String phoneNumber,
-                                         DevSkills skill){
+    public Developer createDeveloper(String firstName, String lastName,String email, String encodedPassword,
+                                     String phoneNumber, DevSkills skill){
+
         Developer developer = Developer.builder()
                 .email(email.toLowerCase())
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
-                .password(passwordEncoder.encode(rawPassword)) // Should be encoded
+                .password(encodedPassword)
                 .userRole(UserRole.DEVELOPER)
                 .skill(skill)
                 .build();
 
+        return developerRepository.save(developer);
+    }
+
+    //can still create user from the /developer route refactor from master branch keep here for learning
+    @Override
+    public DeveloperDTO createDeveloper(DeveloperRegistrationRequest request) {
+        Developer developer = Developer.builder()
+                .email(request.getEmail().toLowerCase())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .phoneNumber(request.getPhoneNumber())
+                .password(passwordEncoder.encode(request.getPassword())) // Should be encoded
+                .userRole(UserRole.DEVELOPER)
+                .skill(request.getSkill())
+                .build();
+
         Developer savedDeveloper = developerRepository.save(developer);
 
-        //TODO WILL REMOVE THIS LATER
-//        auditLogService.logDeveloperCreate(savedDeveloper.getId(), savedDeveloper);
+        auditLogService.logDeveloperCreate(savedDeveloper.getId(), savedDeveloper);
 
-        return savedDeveloper;
+        return entityDTOMapper.mapDeveloperToDeveloperDTO(savedDeveloper);
     }
 
 

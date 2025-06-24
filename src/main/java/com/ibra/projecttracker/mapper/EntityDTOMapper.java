@@ -43,8 +43,11 @@ public class EntityDTOMapper {
         }
         DeveloperDTO developerDTO = new DeveloperDTO();
         developerDTO.setId(developer.getId());
-        developerDTO.setName(developer.getFirstName() + " " + developer.getLastName());
+        developerDTO.setFirstName(developer.getFirstName());
+        developerDTO.setLastName(developer.getLastName());
         developerDTO.setEmail(developer.getEmail());
+        developerDTO.setPhoneNumber(developer.getPhoneNumber());
+        developerDTO.setUserRole(developer.getUserRole());
         developerDTO.setSkill(developer.getSkill());
         return developerDTO;
     }

@@ -2,6 +2,7 @@ package com.ibra.projecttracker.service;
 
 
 import com.ibra.projecttracker.dto.DeveloperDTO;
+import com.ibra.projecttracker.dto.request.DeveloperRegistrationRequest;
 import com.ibra.projecttracker.dto.request.DeveloperUpdateDetails;
 import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.enums.DevSkills;
@@ -21,4 +22,6 @@ public interface DeveloperService {
 
     DeveloperDTO getDeveloperById(Long developerId);
     void deleteDeveloper(Long developerId);
+    DeveloperDTO createDeveloper(DeveloperRegistrationRequest request);
+
 }
