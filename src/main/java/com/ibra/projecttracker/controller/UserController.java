@@ -3,6 +3,7 @@ package com.ibra.projecttracker.controller;
 import com.ibra.projecttracker.dto.*;
 import com.ibra.projecttracker.dto.request.UpdateUserRequest;
 import com.ibra.projecttracker.dto.response.UserSuccessResponse;
+import com.ibra.projecttracker.service.TaskAssignmentService;
 import com.ibra.projecttracker.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,21 +17,25 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
+    private final TaskAssignmentService taskAssignmentService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, TaskAssignmentService taskAssignmentService) {
         this.userService = userService;
+        this.taskAssignmentService = taskAssignmentService;
     }
 
     private UserSuccessResponse buildUserResponse(
             String message,
             HttpStatus status,
             UserDTO user,
-            List<UserDTO> users) {
+            List<UserDTO> users,
+            List<TaskAssignmentDTO> taskAssignments) {
         return UserSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .user(user)
                 .users(users)
+                .taskAssignments(taskAssignments)
                 .build();
     }
 
@@ -43,7 +48,7 @@ public class UserController {
                         "User retrieved successfully",
                         HttpStatus.OK,
                         userDTO,
-                        null));
+                        null, null));
     }
 
     @GetMapping
@@ -55,7 +60,7 @@ public class UserController {
                         "All users retrieved successfully",
                         HttpStatus.OK,
                         null,
-                        userDTOS));
+                        userDTOS,null));
     }
 
     @GetMapping("/{id}")
@@ -67,7 +72,7 @@ public class UserController {
                         "User retrieved successfully",
                         HttpStatus.OK,
                         userDTO,
-                        null));
+                        null, null));
     }
 
     @PutMapping("/{id}")
@@ -79,7 +84,7 @@ public class UserController {
                         "User updated successfully",
                         HttpStatus.OK,
                         updatedUserDTO,
-                        null));
+                        null ,null));
     }
 
     @DeleteMapping("/{id}")
@@ -91,6 +96,20 @@ public class UserController {
                         "User deleted successfully",
                         HttpStatus.OK,
                         null,
-                        null));
+                        null, null));
+    }
+
+
+    @GetMapping("/{id}/tasks")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<UserSuccessResponse> getTaskAssignedToDeveloper(@PathVariable("id") Long id) {
+        List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildUserResponse(
+                        "Task retrieved successfully",
+                        HttpStatus.OK,
+                        null,
+                        null,
+                        taskAssignmentByDeveloper));
     }
 }

@@ -26,7 +26,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
-
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -72,7 +71,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/oauth2/success", "/api/v1/auth/login",
                                 "/api/v1/auth/register", "/api/v1/auth/refresh",
-                                "/api/v1/auth/logout", "/api/v1/home").permitAll()
+                                "/api/v1/auth/logout", "/api/v1/home", "/actuator/**").permitAll()
                         .requestMatchers("/api/v1/projects/**", "/api/v1/tasks/**",
                                 "/api/v1/users/**", "/api/v1/task-assignments/**").authenticated()
                         .anyRequest().authenticated())
@@ -107,7 +106,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/oauth2/authorization/**", "/oauth2/callback/**",
-                                "/login/oauth2/code/**", "/login", "/error").permitAll()
+                                "/login/oauth2/code/**", "/login", "/error", "/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())

@@ -41,7 +41,6 @@ public class ContractorServiceImpl implements ContractorService {
 
         Contractor savedContractor = contractorRepository.save(contractor);
 
-        //TODO : to be handled in the user service
         auditLogService.logDeveloperCreate(savedContractor.getId(), savedContractor);
 
         return entityDTOMapper.mapContractorToContractorDTO(savedContractor);
