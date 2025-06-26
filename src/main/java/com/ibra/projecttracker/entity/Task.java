@@ -26,7 +26,7 @@ public class Task {
     private LocalDateTime deadline;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", referencedColumnName = "projectId")
     private Project project;
 

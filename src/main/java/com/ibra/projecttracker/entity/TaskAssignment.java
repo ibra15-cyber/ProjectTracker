@@ -15,19 +15,19 @@ public class TaskAssignment {
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long taskAssignmentId;
 
-        @ManyToOne
+        @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "task_id", referencedColumnName = "taskId")
         @ToString.Exclude
         private Task task;
 
-        @ManyToOne
+        @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "developer_id")
         @ToString.Exclude
         private Developer developer;
 
         private LocalDateTime assignedOn;
 
-        @ManyToOne
+        @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id")
         private User assignedBy;
 
