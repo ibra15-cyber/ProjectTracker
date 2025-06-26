@@ -50,7 +50,7 @@ docker-compose-base.yml
 
 oldFilterChain
 
-#com*
-#ch.qos.logback.core.util.COWArrayList.class
-#java.lang.reflect.Method.class
-#org*
+com*
+ch.qos.logback.core.util.COWArrayList.class
+java.lang.reflect.Method.class
+org*

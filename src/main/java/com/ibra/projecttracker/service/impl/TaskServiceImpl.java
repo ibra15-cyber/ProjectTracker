@@ -8,6 +8,7 @@ import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.ProjectRepository;
 import com.ibra.projecttracker.repository.TaskRepository;
 import com.ibra.projecttracker.service.TaskService;
+import com.ibra.projecttracker.utility.redis.CustomMetrics;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -24,12 +25,14 @@ public class TaskServiceImpl implements TaskService {
     private final EntityDTOMapper entityDTOMapper;
     private final ProjectRepository projectRepository;
     private final AuditLogService auditLogService;
+    private final CustomMetrics customMetrics;
 
-    public TaskServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, AuditLogService auditLogService) {
+    public TaskServiceImpl(TaskRepository taskRepository, EntityDTOMapper entityDTOMapper, ProjectRepository projectRepository, AuditLogService auditLogService, CustomMetrics customMetrics) {
         this.taskRepository = taskRepository;
         this.entityDTOMapper = entityDTOMapper;
         this.projectRepository = projectRepository;
         this.auditLogService = auditLogService;
+        this.customMetrics = customMetrics;
     }
 
     @Override
@@ -47,6 +50,8 @@ public class TaskServiceImpl implements TaskService {
         Task savedTask = taskRepository.save(newTask);
 
         auditLogService.logTaskCreate(savedTask.getTaskId(), savedTask);
+
+        customMetrics.incrementTaskCount();
 
         return entityDTOMapper.mapTaskToTaskDTO(savedTask);
     }

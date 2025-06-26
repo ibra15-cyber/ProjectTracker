@@ -106,7 +106,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/oauth2/authorization/**", "/oauth2/callback/**",
-                                "/login/oauth2/code/**", "/login", "/error", "/actuator/**").permitAll()
+                                "/login/oauth2/code/**", "/login", "/error", "/actuator/**", "/debug-cache").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())

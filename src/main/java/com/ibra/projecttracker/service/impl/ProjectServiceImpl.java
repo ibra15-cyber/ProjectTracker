@@ -60,6 +60,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional(readOnly = true)
     @Override
+    @Cacheable(value = "projects", key = "'allProjects'")
     public List<ProjectListDTO> getAllProjects() {
         List<Project> projects = projectRepository.findAll();
         return projects.stream()
