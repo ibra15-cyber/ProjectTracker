@@ -69,7 +69,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-//    @Cacheable(key="#projectId", value = "projects")
+    @Cacheable(key="#projectId", value = "projects")
     public ProjectListDTO getProjectById(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -82,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-//    @CachePut(value = "projects", key = "#projectId")  //there exists a property unless to filter your output
+    @CachePut(value = "projects", key = "#projectId")  //there exists a property unless to filter your output
     public ProjectListDTO updateProject(Long projectId, ProjectDTO projectDTO) {
         Project projectToUpdate = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -106,7 +106,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-//    @CacheEvict(value = "projects", key = "#projectId")
+    @CacheEvict(value = "projects", key = "#projectId")
     public void deleteProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));

@@ -11,6 +11,7 @@ import com.ibra.projecttracker.mapper.EntityDTOMapper;
 import com.ibra.projecttracker.repository.*;
 import com.ibra.projecttracker.service.AuthService;
 import com.ibra.projecttracker.service.TaskAssignmentService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class TaskAssignmentServiceImpl implements TaskAssignmentService {
@@ -111,7 +114,9 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         taskAssignmentRepository.delete(taskAssignmentToDelete);
     }
 
+    @Transactional
     @Override
+    @Cacheable(key="#developerId", value = "taskAssignments")
     public List<TaskAssignmentListDTO> getAllTaskAssignmentByDeveloper(Long developerId) {
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found"));
