@@ -1,6 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.ProjectDTO;
+import com.ibra.projecttracker.dto.ProjectListDTO;
 import com.ibra.projecttracker.dto.response.ProjectSuccessResponse;
 import com.ibra.projecttracker.enums.ProjectStatus;
 import com.ibra.projecttracker.service.ProjectService;
@@ -28,9 +29,9 @@ public class ProjectController {
     private ProjectSuccessResponse buildProjectResponse(
             String message,
             HttpStatus status,
-            ProjectDTO project,
-            List<ProjectDTO> projects,
-            Page<ProjectDTO> projectPage,
+            ProjectListDTO project,
+            List<ProjectListDTO> projects,
+            Page<ProjectListDTO> projectPage,
             Map<String, String> projectSummary) {
         return ProjectSuccessResponse.builder()
                 .message(message)
@@ -45,7 +46,7 @@ public class ProjectController {
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectSuccessResponse> createProject(@Valid @RequestBody ProjectDTO projectDTO) {
-        ProjectDTO newProject = projectService.createProject(projectDTO);
+        ProjectListDTO newProject = projectService.createProject(projectDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(buildProjectResponse(
                         "Project created successfully",
@@ -59,7 +60,7 @@ public class ProjectController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectSuccessResponse> getAllProjects() {
-        List<ProjectDTO> projectDTOs = projectService.getAllProjects();
+        List<ProjectListDTO> projectDTOs = projectService.getAllProjects();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
                         "All projects retrieved successfully",
@@ -72,7 +73,7 @@ public class ProjectController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectSuccessResponse> getProjectById(@PathVariable("id") Long id) {
-        ProjectDTO projectDTO = projectService.getProjectById(id);
+        ProjectListDTO projectDTO = projectService.getProjectById(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
                         "Project retrieved successfully",
@@ -100,7 +101,7 @@ public class ProjectController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     public ResponseEntity<ProjectSuccessResponse> updateProject(@PathVariable("id") Long id, @Valid @RequestBody ProjectDTO projectDTO) {
-        ProjectDTO updateProject = projectService.updateProject(id, projectDTO);
+        ProjectListDTO updateProject = projectService.updateProject(id, projectDTO);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
                         "Project updated successfully",
@@ -132,7 +133,7 @@ public class ProjectController {
             @RequestParam(defaultValue = "projectId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
-        Page<ProjectDTO> projectsPage = projectService.getProjectsPageable(page, size, sortBy, sortDirection);
+        Page<ProjectListDTO> projectsPage = projectService.getProjectsPageable(page, size, sortBy, sortDirection);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildProjectResponse(
                         "All projects retrieved successfully",
@@ -157,7 +158,7 @@ public class ProjectController {
             @RequestParam(defaultValue = "100") int pageSize,
             @RequestParam(defaultValue = "projectId") String sortBy) {
 
-        List<ProjectDTO> projectDTOS = projectService.dynamicFilterProjects(
+        List<ProjectListDTO> projectDTOS = projectService.dynamicFilterProjects(
                 projectId, name, description, createdAt, deadline, status, pageSize, pageNumber, sortBy);
 
         return ResponseEntity.status(HttpStatus.OK)

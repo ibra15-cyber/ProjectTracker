@@ -29,7 +29,8 @@ public class UserController {
             HttpStatus status,
             UserDTO user,
             List<UserDTO> users,
-            List<TaskAssignmentDTO> taskAssignments) {
+            List<TaskAssignmentDTO> taskAssignments,
+            List<TaskAssignmentListDTO> taskAssignmentList) {
         return UserSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
@@ -48,7 +49,7 @@ public class UserController {
                         "User retrieved successfully",
                         HttpStatus.OK,
                         userDTO,
-                        null, null));
+                        null, null, null));
     }
 
     @GetMapping
@@ -60,7 +61,7 @@ public class UserController {
                         "All users retrieved successfully",
                         HttpStatus.OK,
                         null,
-                        userDTOS,null));
+                        userDTOS,null, null));
     }
 
     @GetMapping("/{id}")
@@ -72,11 +73,11 @@ public class UserController {
                         "User retrieved successfully",
                         HttpStatus.OK,
                         userDTO,
-                        null, null));
+                        null, null, null));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and @securityUtils.isUserOwner(#id))")
+    @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and @SecurityUtils.isUserOwner(#id))")
     public ResponseEntity<UserSuccessResponse> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UpdateUserRequest userDTO) {
         UserDTO updatedUserDTO = userService.updateUser(id, userDTO);
         return ResponseEntity.status(HttpStatus.OK)
@@ -84,7 +85,7 @@ public class UserController {
                         "User updated successfully",
                         HttpStatus.OK,
                         updatedUserDTO,
-                        null ,null));
+                        null ,null, null));
     }
 
     @DeleteMapping("/{id}")
@@ -96,20 +97,21 @@ public class UserController {
                         "User deleted successfully",
                         HttpStatus.OK,
                         null,
-                        null, null));
+                        null, null, null));
     }
 
 
     @GetMapping("/{id}/tasks")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER') or (hasAuthority('DEVELOPER') and @SecurityUtils.isDeveloperOwner(#id))")
     public ResponseEntity<UserSuccessResponse> getTaskAssignedToDeveloper(@PathVariable("id") Long id) {
-        List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(id);
+        List<TaskAssignmentListDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildUserResponse(
                         "Task retrieved successfully",
                         HttpStatus.OK,
                         null,
                         null,
-                        taskAssignmentByDeveloper));
+                        null
+                , taskAssignmentByDeveloper));
     }
 }

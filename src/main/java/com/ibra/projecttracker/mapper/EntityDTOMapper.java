@@ -122,5 +122,26 @@ public class EntityDTOMapper {
         contractorDTO.setCompanyAddress(contractor.getCompanyAddress());
         return contractorDTO;
     }
+
+    public ProjectListDTO mapProjectToProjectListDTO(Project project) {
+        if (project == null) {
+            return null;
+        }
+        ProjectListDTO projectListDTO = new ProjectListDTO();
+        projectListDTO.setId(project.getProjectId());
+        projectListDTO.setName(project.getName());
+        projectListDTO.setStatus(project.getStatus());
+        return projectListDTO;
+    }
+
+    public TaskAssignmentListDTO mapTaskAssignmentToListDTO(TaskAssignment taskAssignment) {
+        if (taskAssignment == null) {
+            return null;
+        }
+        TaskAssignmentListDTO dto = new TaskAssignmentListDTO();
+        dto.setTaskTitle(taskAssignment.getTask().getTitle());
+        dto.setStatus(taskAssignment.getStatus());
+        return dto;
+    }
 }
 

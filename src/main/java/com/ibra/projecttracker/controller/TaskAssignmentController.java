@@ -1,6 +1,7 @@
 package com.ibra.projecttracker.controller;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
+import com.ibra.projecttracker.dto.TaskAssignmentListDTO;
 import com.ibra.projecttracker.dto.response.TaskAssignmentSuccessResponse;
 import com.ibra.projecttracker.entity.TaskAssignment;
 import com.ibra.projecttracker.mapper.EntityDTOMapper;
@@ -31,12 +32,14 @@ public class TaskAssignmentController {
             String message,
             HttpStatus status,
             TaskAssignmentDTO taskAssignment,
-            List<TaskAssignmentDTO> taskAssignments) {
+            List<TaskAssignmentDTO> taskAssignments,
+            List<TaskAssignmentListDTO> taskAssignmentByDeveloper) {
         return TaskAssignmentSuccessResponse.builder()
                 .message(message)
                 .statusCode(String.valueOf(status.value()))
                 .taskAssignment(taskAssignment)
                 .taskAssignments(taskAssignments)
+                .taskAssignmentList(taskAssignmentByDeveloper)
                 .build();
     }
 
@@ -49,7 +52,8 @@ public class TaskAssignmentController {
                         "Task assigned successfully",
                         HttpStatus.CREATED,
                         entityDTOMapper.mapTaskAssignmentToDTO(newTask),
-                        null));
+                        null,
+                null));
     }
 
     @GetMapping
@@ -64,7 +68,8 @@ public class TaskAssignmentController {
                         "All assigned tasks retrieved successfully",
                         HttpStatus.OK,
                         null,
-                        assignmentDTOS));
+                        assignmentDTOS
+                , null));
     }
 
     @GetMapping("/{id}")
@@ -76,7 +81,7 @@ public class TaskAssignmentController {
                         "Assigned task retrieved successfully",
                         HttpStatus.OK,
                         entityDTOMapper.mapTaskAssignmentToDTO(assignTaskRequest),
-                        null));
+                        null, null));
     }
 
     @PutMapping("/{id}")
@@ -87,7 +92,7 @@ public class TaskAssignmentController {
                 "Assigned task updated successfully",
                 HttpStatus.OK,
                 entityDTOMapper.mapTaskAssignmentToDTO(updateTask),
-                null));
+                null, null));
     }
 
     @DeleteMapping("/{id}")
@@ -99,17 +104,18 @@ public class TaskAssignmentController {
                         "Assigned task deleted successfully",
                         HttpStatus.OK,
                         null,
-                        null));
+                        null, null));
     }
 
     @GetMapping("/by-developer/{developerId}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER') or (hasAuthority('DEVELOPER') and @SecurityUtils.isDeveloperOwner(#developerId))")
     public ResponseEntity<TaskAssignmentSuccessResponse> getTasksByDeveloperId(@PathVariable("developerId") Long developerId) {
-        List<TaskAssignmentDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
+        List<TaskAssignmentListDTO> taskAssignmentByDeveloper = taskAssignmentService.getAllTaskAssignmentByDeveloper(developerId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildTaskAssignmentResponse(
                         "Assigned tasks retrieved successfully",
                         HttpStatus.OK,
+                        null,
                         null,
                         taskAssignmentByDeveloper));
     }

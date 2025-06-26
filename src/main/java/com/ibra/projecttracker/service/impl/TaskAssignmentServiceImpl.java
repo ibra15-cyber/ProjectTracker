@@ -1,6 +1,7 @@
 package com.ibra.projecttracker.service.impl;
 
 import com.ibra.projecttracker.dto.TaskAssignmentDTO;
+import com.ibra.projecttracker.dto.TaskAssignmentListDTO;
 import com.ibra.projecttracker.entity.Developer;
 import com.ibra.projecttracker.entity.Task;
 import com.ibra.projecttracker.entity.TaskAssignment;
@@ -111,12 +112,12 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     }
 
     @Override
-    public List<TaskAssignmentDTO> getAllTaskAssignmentByDeveloper(Long developerId) {
+    public List<TaskAssignmentListDTO> getAllTaskAssignmentByDeveloper(Long developerId) {
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found"));
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findByDeveloper(developer);
         return taskAssignments.stream()
-                .map(entityDTOMapper::mapTaskAssignmentToDTO)
+                .map(entityDTOMapper::mapTaskAssignmentToListDTO)
                 .collect(Collectors.toList());
     }
 

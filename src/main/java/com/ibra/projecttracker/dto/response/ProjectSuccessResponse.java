@@ -2,6 +2,7 @@ package com.ibra.projecttracker.dto.response;
 
 
 import com.ibra.projecttracker.dto.ProjectDTO;
+import com.ibra.projecttracker.dto.ProjectListDTO;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -15,8 +16,8 @@ public class ProjectSuccessResponse {
     private String message;
     private String statusCode;
     private Long timestamp;
-    private ProjectDTO project;
-    private List<ProjectDTO> projects;
-    private Page<ProjectDTO> projectPage;
+    private ProjectListDTO project;
+    private List<ProjectListDTO> projects;
+    private Page<ProjectListDTO> projectPage;
     private Map<String, String> projectSummary;
 }
