@@ -1,6 +1,6 @@
 # ProjectTracker
 
-A comprehensive project management application built with Spring Boot, PostgreSQL, MongoDB, and Redis, designed to track projects, tasks, and developer assignments. The application includes features for auditing changes, caching, dynamic project filtering, JWT authentication, OAuth2 integration, automated email notifications, and comprehensive monitoring capabilities.
+A comprehensive project management application built with Spring Boot, PostgreSQL, MongoDB, and Redis, designed to track projects, tasks, and developer assignments. The application includes features for auditing changes, caching, dynamic project filtering, JWT authentication, OAuth2 integration, and automated email notifications.
 
 ## Table of Contents
 
@@ -15,7 +15,6 @@ A comprehensive project management application built with Spring Boot, PostgreSQ
     - [Database Configuration](#database-configuration)
     - [Security Configuration](#security-configuration)
     - [Email Configuration](#email-configuration)
-    - [Monitoring Configuration](#monitoring-configuration)
 - [Security Features](#security-features)
     - [JWT Authentication](#jwt-authentication)
     - [OAuth2 Integration](#oauth2-integration)
@@ -23,9 +22,6 @@ A comprehensive project management application built with Spring Boot, PostgreSQ
 - [Event Scheduling](#event-scheduling)
     - [Email Notifications](#email-notifications)
     - [Cron Job Configuration](#cron-job-configuration)
-- [Monitoring and Performance](#monitoring-and-performance)
-    - [Multi-Tool Performance Monitoring](#multi-tool-performance-monitoring)
-    - [Metrics and Health Checks](#metrics-and-health-checks)
 - [Database Schema](#database-schema)
 - [API Endpoints](#api-endpoints)
 - [Authentication Endpoints](#authentication-endpoints)
@@ -44,12 +40,11 @@ ProjectTracker is a secure backend application that provides a robust API for ma
 - **Developer Management**: Manage developer profiles, including their skills.
 - **Task Assignments**: Assign tasks to developers and track their individual progress.
 - **Security**: JWT-based authentication with OAuth2 support (Google & GitHub).
-- **Email Notifications**: Automated email alerts for deadlines and project updates with retry mechanisms.
+- **Email Notifications**: Automated email alerts for deadlines and project updates.
 - **Auditing**: Comprehensive logging of critical actions to MongoDB.
-- **Caching**: Utilizes Redis for efficient data retrieval with statistics.
+- **Caching**: Utilizes Redis for efficient data retrieval.
 - **Dynamic Filtering**: Advanced search capabilities for projects using JPA Specifications.
 - **Scheduled Tasks**: Automated background processes for monitoring and notifications.
-- **Performance Monitoring**: Integrated multi-tool monitoring with JMeter, JProfiler, Grafana+Prometheus, and VisualVM.
 
 ## Features
 
@@ -57,9 +52,9 @@ ProjectTracker is a secure backend application that provides a robust API for ma
 * **JWT Authentication**: Secure token-based authentication system.
 * **OAuth2 Integration**: Login with Google and GitHub accounts.
 * **Role-Based Access Control**: Different permission levels for users.
-* **Email Notifications**: Automated email alerts with robust retry mechanisms and timeout configurations.
+* **Email Notifications**: Automated email alerts for deadlines, assignments, and project updates.
 * **Scheduled Tasks**: Cron jobs running every 5 minutes to scan for upcoming deadlines and send notifications.
-* **Caching with Redis**: Improves performance for frequently accessed data with statistics and TTL management.
+* **Caching with Redis**: Improves performance for frequently accessed data (e.g., Project details).
 * **Audit Logging with MongoDB**: Records all significant changes and actions within the system for traceability.
 * **Dynamic Project Filtering**: Filter projects by name, description, status, deadlines, and creation dates using Spring Data JPA Specifications.
 * **Pagination and Sorting**: Retrieve paginated and sorted lists of entities.
@@ -67,35 +62,28 @@ ProjectTracker is a secure backend application that provides a robust API for ma
 * **Global Exception Handling**: Provides consistent error responses for various exceptions.
 * **DTO Mapping**: Separate DTOs for data transfer, ensuring clear API contracts.
 * **API Documentation**: Integrated with Springdoc OpenAPI for interactive API documentation (Swagger UI).
-* **Comprehensive Performance Monitoring**: Multi-tool monitoring stack with JMeter, JProfiler, Grafana+Prometheus, and VisualVM.
-* **Health Checks**: Built-in health monitoring endpoints.
-* **Response Compression**: Automatic compression for improved performance.
+* **Environment Variables**: Uses `spring-dotenv` for managing environment-specific configurations.
 
 ## Technologies Used
 
 * **Spring Boot**: 3.5.0
 * **Java**: 21
 * **Gradle**: Build automation
-* **PostgreSQL**: 15-alpine - Relational database for core project, task, and developer data.
-* **MongoDB**: 6.0 - NoSQL database for audit logs.
-* **Redis**: 7.0-alpine - In-memory data store for caching.
+* **PostgreSQL**: Relational database for core project, task, and developer data.
+* **MongoDB**: NoSQL database for audit logs.
+* **Redis**: In-memory data store for caching.
 * **Spring Security**: Authentication and authorization framework.
 * **Spring Data JPA**: For PostgreSQL interactions.
 * **Spring Data MongoDB**: For MongoDB interactions.
 * **Spring Data Redis**: For Redis interactions and caching.
 * **JWT (JSON Web Tokens)**: For stateless authentication.
 * **OAuth2**: For third-party authentication (Google, GitHub).
-* **Spring Boot Mail**: For email notifications with retry mechanisms.
+* **Spring Boot Mail**: For email notifications.
 * **Spring Scheduler**: For automated tasks and cron jobs.
-* **Spring Boot Actuator**: For application monitoring and metrics.
 * **Lombok**: Reduces boilerplate code.
 * **Springdoc OpenAPI UI**: For API documentation (Swagger UI).
-* **Docker**: Containerization with multi-stage builds.
-* **JMeter**: Performance and load testing.
-* **JProfiler**: Advanced Java profiling and analysis.
-* **Grafana**: Metrics visualization and dashboards.
-* **Prometheus**: Metrics collection and monitoring.
-* **VisualVM**: JVM monitoring and profiling.
+* **`spring-dotenv`**: For loading environment variables from `.env` files.
+* **Validation**: `jakarta.validation.constraints` for request body validation.
 
 ## Prerequisites
 
@@ -104,11 +92,9 @@ Before running the application, ensure you have the following installed:
 * **Java Development Kit (JDK)**: Version 21
 * **Gradle**: (Usually comes bundled with Spring Boot projects or can be installed separately)
 * **Docker** and **Docker Compose**: For easily setting up PostgreSQL, MongoDB, and Redis.
-* **JMeter**: For performance testing and load testing.
-* **JProfiler**: For advanced Java profiling (optional, commercial license required).
-* **Grafana**: For metrics visualization and dashboards.
-* **Prometheus**: For metrics collection.
-* **VisualVM**: For JVM monitoring and profiling.
+* **PostgreSQL Client**: Optional, for direct database interaction.
+* **MongoDB Client**: Optional, for direct database interaction.
+* **Redis CLI**: Optional, for direct cache interaction.
 * **Email Service Account**: Gmail or other SMTP service for email notifications.
 * **OAuth2 Applications**: Google and GitHub OAuth applications for social login.
 
@@ -132,25 +118,30 @@ You can run this application either locally or using Docker Compose.
     Ensure Docker Desktop is running. You can start all necessary database services with a single command:
 
     ```bash
-    # Start only the databases for local development
-    docker compose up -d postgresql mongodb redis
+    # Assuming you have a docker-compose.yml in the project root
+    docker compose up -d postgres redis mongo
     ```
 
-    This will start:
-    - PostgreSQL on `5433` (mapped from container port 5432)
-    - Redis on `6380` (mapped from container port 6379)
-    - MongoDB on `27018` (mapped from container port 27017)
+    This will start PostgreSQL on `5432`, Redis on `6379`, and MongoDB on `27017`.
 
 3.  **Environment Variables Setup:**
     Create a `.env` file in the project root with the following variables:
 
     ```env
     # Database Configuration
-    postgres_user=postgres
-    postgres_password=your_postgres_password
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_NAME=project_tracker
+    DB_USERNAME=postgres
+    DB_PASSWORD=postgres
+    MONGODB_URI=mongodb://localhost:27017/project_tracker_log
+    REDIS_HOST=localhost
+    REDIS_PORT=6379
 
     # JWT Configuration
-    secretJwtString=your-256-bit-secret-key-here
+    JWT_SECRET=your-256-bit-secret-key-here
+    JWT_EXPIRATION=86400000
+    JWT_REFRESH_EXPIRATION=604800000
 
     # OAuth2 Configuration
     GOOGLE_CLIENT_ID=your-google-client-id
@@ -159,8 +150,15 @@ You can run this application either locally or using Docker Compose.
     GITHUB_CLIENT_SECRET=your-github-client-secret
 
     # Email Configuration
-    gmail_account=your-email@gmail.com
-    gmail_password=your-app-password
+    MAIL_HOST=smtp.gmail.com
+    MAIL_PORT=587
+    MAIL_USERNAME=your-email@gmail.com
+    MAIL_PASSWORD=your-app-password
+    MAIL_FROM=your-email@gmail.com
+
+    # Application Configuration
+    SERVER_PORT=3232
+    FRONTEND_URL=http://localhost:3000
     ```
 
 4.  **Configure OAuth2 Applications:**
@@ -170,23 +168,14 @@ You can run this application either locally or using Docker Compose.
     - Create a new project or select existing one
     - Enable Google+ API
     - Create OAuth2 credentials
-    - Add `http://localhost:3232/login/oauth2/code/google` to authorized redirect URIs
+    - Add `http://localhost:3232/oauth2/callback/google` to authorized redirect URIs
 
     **GitHub OAuth2:**
     - Go to GitHub Settings > Developer settings > OAuth Apps
     - Create a new OAuth App
-    - Set Authorization callback URL to `http://localhost:3232/login/oauth2/code/github`
+    - Set Authorization callback URL to `http://localhost:3232/oauth2/callback/github`
 
-5.  **Update local database configuration:**
-    If running databases via Docker Compose, update your local database ports in `application.properties`:
-
-    ```properties
-    spring.datasource.url=jdbc:postgresql://localhost:5433/project_tracker
-    spring.data.mongodb.uri=mongodb://localhost:27018/project_tracker_log
-    spring.data.redis.port=6380
-    ```
-
-6.  **Run the application:**
+5.  **Run the application:**
     You can run the Spring Boot application using Gradle:
 
     ```bash
@@ -199,37 +188,62 @@ You can run this application either locally or using Docker Compose.
 
 For a fully containerized environment, you can use Docker Compose:
 
-1.  **Create environment file:**
-    Ensure your `.env` file is properly configured as shown above.
+```yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: project_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-2.  **Start all services:**
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  app:
+    build: .
+    ports:
+      - "3232:3232"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/project_tracker
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/project_tracker_log
+      SPRING_DATA_REDIS_HOST: redis
+    depends_on:
+      - postgres
+      - redis
+      - mongo
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:
+```
+
+1.  **Build and start all services:**
 
     ```bash
     docker compose up --build -d
     ```
 
-    This will start:
-    - **Application**: Available at `http://localhost:3333`
-    - **PostgreSQL**: Available at `localhost:5433`
-    - **MongoDB**: Available at `localhost:27018`
-    - **Redis**: Available at `localhost:6380`
-    - **JMX JProfiler**: Available at `localhost:9010`
-
-3.  **View logs:**
-
-    ```bash
-    # View all services logs
-    docker compose logs -f
-
-    # View specific service logs
-    docker compose logs -f app
-    ```
-
-4.  **Stop services:**
-
-    ```bash
-    docker compose down
-    ```
+The application will be accessible at `http://localhost:3232`.
 
 ## Configuration
 
@@ -239,95 +253,56 @@ The main configuration is in `src/main/resources/application.properties`:
 
 ```properties
 spring.application.name=ProjectTracker
-server.port=3232
+server.port=${SERVER_PORT:3232}
 
 # PostgreSQL connection
-spring.datasource.url=jdbc:postgresql://localhost:5432/project_tracker
-spring.datasource.username=${postgres_user}
-spring.datasource.password=${postgres_password}
+spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:project_tracker}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:postgres}
 spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
 # MongoDB connection
-spring.data.mongodb.uri=mongodb://localhost:27017/project_tracker_log
+spring.data.mongodb.uri=${MONGODB_URI:mongodb://localhost:27017/project_tracker_log}
 
 # Redis configuration
 spring.cache.type=redis
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
-spring.cache.redis.cache-null-values=false
-spring.cache.redis.key-prefix=yourApp:
-spring.cache.redis.time-to-live=1h
-spring.data.redis.client-type=lettuce
+spring.data.redis.host=${REDIS_HOST:localhost}
+spring.data.redis.port=${REDIS_PORT:6379}
 ```
 
 ### Security Configuration
 
 ```properties
 # JWT Configuration
-secretJwtString=${secretJwtString}
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION:86400000}
+jwt.refresh.expiration=${JWT_REFRESH_EXPIRATION:604800000}
 
 # OAuth2 Configuration
 spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
 spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
-spring.security.oauth2.client.registration.google.scope=openid,profile,email
-spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
-spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth
-spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
-spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri=${FRONTEND_URL}/oauth2/callback/google
 
 spring.security.oauth2.client.registration.github.client-id=${GITHUB_CLIENT_ID}
 spring.security.oauth2.client.registration.github.client-secret=${GITHUB_CLIENT_SECRET}
-spring.security.oauth2.client.registration.github.scope=user:email,read:user
-spring.security.oauth2.client.registration.github.redirect-uri={baseUrl}/login/oauth2/code/github
+spring.security.oauth2.client.registration.github.scope=user:email
+spring.security.oauth2.client.registration.github.redirect-uri=${FRONTEND_URL}/oauth2/callback/github
 ```
 
 ### Email Configuration
 
-The application now includes robust email configuration with retry mechanisms and timeout settings:
-
 ```properties
-# SMTP Connection
-spring.mail.host=smtp.gmail.com
-spring.mail.port=465
-spring.mail.username=${gmail_account}
-spring.mail.password=${gmail_password}
-
-# Timeout Settings
-spring.mail.properties.mail.smtp.timeout=5000
-spring.mail.properties.mail.smtp.writetimeout=5000
-spring.mail.properties.mail.smtp.connectiontimeout=5000
-
-# Retry Settings
-spring.mail.properties.mail.smtp.retry.enable=true
-spring.mail.properties.mail.smtp.maxretries=3
-spring.mail.properties.mail.smtp.initialretrydelay=1000
-spring.mail.properties.mail.smtp.retryinterval=2000
-
-# SSL/Auth Configuration
+# Email Configuration
+spring.mail.host=${MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${MAIL_PORT:587}
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
 spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.socketFactory.port=465
-spring.mail.properties.mail.smtp.socketFactory.class=javax.net.ssl.SSLSocketFactory
-spring.mail.properties.mail.smtp.socketFactory.fallback=false
-spring.mail.properties.mail.smtp.ssl.enable=true
-```
-
-### Monitoring Configuration
-
-```properties
-# Response compression
-server.compression.enabled=true
-server.compression.mime-types=text/html,text/xml,text/plain,text/css,application/javascript,application/json
-server.compression.min-response-size=1024
-
-# Actuator endpoints
-management.endpoints.web.exposure.include=health,info,metrics,prometheus,heapdump
-management.endpoint.metrics.access=read_only
-management.prometheus.metrics.export.enabled=true
-management.endpoint.heapdump.access=read_only
-
-# Cache statistics
-spring.cache.redis.enable-statistics=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+app.mail.from=${MAIL_FROM}
 ```
 
 ## Security Features
@@ -335,6 +310,10 @@ spring.cache.redis.enable-statistics=true
 ### JWT Authentication
 
 The application uses JWT (JSON Web Tokens) for stateless authentication:
+
+**Token Structure:**
+- **Access Token**: Short-lived (24 hours by default) for API access
+- **Refresh Token**: Long-lived (7 days by default) for token renewal
 
 **Usage:**
 
@@ -349,15 +328,35 @@ The application uses JWT (JSON Web Tokens) for stateless authentication:
    }
    ```
 
-2. **Use token in API calls:**
+2. **Response:**
+   ```json
+   {
+     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+     "tokenType": "Bearer",
+     "expiresIn": 86400
+   }
+   ```
+
+3. **Use token in API calls:**
    ```bash
    GET /api/projects
    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
 
+4. **Refresh expired tokens:**
+   ```bash
+   POST /api/auth/refresh
+   Content-Type: application/json
+   
+   {
+     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   }
+   ```
+
 ### OAuth2 Integration
 
-The application supports OAuth2 login with Google and GitHub using dynamic redirect URIs:
+The application supports OAuth2 login with Google and GitHub:
 
 **Google OAuth2 Login:**
 ```
@@ -369,26 +368,31 @@ GET /oauth2/authorization/google
 GET /oauth2/authorization/github
 ```
 
-**OAuth2 Callback URLs:**
-- Google: `{baseUrl}/login/oauth2/code/google`
-- GitHub: `{baseUrl}/login/oauth2/code/github`
-
-Where `{baseUrl}` is automatically resolved by Spring Security based on the request.
+**OAuth2 Flow:**
+1. User clicks login with Google/GitHub
+2. User is redirected to OAuth provider
+3. After successful authentication, user is redirected back with authorization code
+4. Application exchanges code for access token
+5. Application creates or updates user account
+6. JWT tokens are generated and returned
 
 ### API Security
 
 **Protected Endpoints:**
 - All `/api/**` endpoints require authentication
-- Public endpoints: `/api/auth/**`, `/oauth2/**`, `/swagger-ui/**`, `/actuator/health`
+- Public endpoints: `/api/auth/**`, `/oauth2/**`, `/swagger-ui/**`
+
+**Role-Based Access:**
+- `ADMIN`: Full access to all resources
+- `PROJECT_MANAGER`: Can manage projects and assign tasks
+- `DEVELOPER`: Can view and update assigned tasks
+- `USER`: Read-only access to own data
 
 ## Event Scheduling
 
 ### Email Notifications
 
-The application automatically sends email notifications with improved reliability:
-- **Robust Retry Mechanism**: Up to 3 retry attempts with configurable delays
-- **Timeout Protection**: Connection, read, and write timeouts to prevent hanging
-- **SSL Security**: Secure email transmission over SSL
+The application automatically sends email notifications for:
 - **Deadline Reminders**: Sent 24 hours before task/project deadlines
 - **Overdue Alerts**: Sent for tasks/projects past their deadlines
 - **Assignment Notifications**: Sent when tasks are assigned to developers
@@ -397,93 +401,59 @@ The application automatically sends email notifications with improved reliabilit
 ### Cron Job Configuration
 
 **Deadline Scanner Job:**
-Runs every 5 minutes to check for upcoming deadlines and overdue items with improved email delivery reliability.
+Runs every 5 minutes to check for upcoming deadlines and overdue items:
 
-## Monitoring and Performance
+```java
+@Scheduled(fixedRate = 300000) // 5 minutes = 300,000 milliseconds
+public void scanForUpcomingDeadlines() {
+    // Scans for deadlines within next 24 hours
+    // Sends email notifications
+    // Updates notification status
+}
+```
 
-### Multi-Tool Performance Monitoring
+**Configuration:**
+```properties
+# Enable scheduling
+spring.task.scheduling.enabled=true
 
-The application includes comprehensive monitoring capabilities using multiple professional tools:
+# Thread pool configuration
+spring.task.scheduling.pool.size=5
+spring.task.scheduling.thread-name-prefix=scheduler-
+```
 
-**JMeter Integration:**
-- Performance and load testing
-- API endpoint stress testing
-- Response time analysis
-- Concurrent user simulation
-
-**JProfiler Integration:**
-- Advanced Java profiling
-- Memory leak detection
-- CPU hotspot analysis
-- Database connection monitoring
-
-**Grafana + Prometheus Integration:**
-- Real-time metrics visualization
-- Custom dashboard creation
-- Alert configuration
-- Historical data analysis
-- System performance trends
-
-**VisualVM Integration:**
-- JVM monitoring and profiling
-- Heap dump analysis
-- Thread monitoring
-- GC analysis
-
-**JMX Configuration:**
-- Port: `9010`
-- No authentication required (development only)
-- Accessible via `host.docker.internal` from monitoring tools
-
-### Metrics and Health Checks
-
-**Available Endpoints:**
-- `/actuator/health`: Application health status
-- `/actuator/info`: Application information
-- `/actuator/metrics`: Application metrics
-- `/actuator/prometheus`: Prometheus-formatted metrics
-- `/actuator/heapdump`: Heap dump for analysis
-
-**Cache Statistics:**
-Redis cache statistics are enabled to monitor cache performance and hit ratios.
+**Email Templates:**
+The application uses customizable email templates for different notification types:
+- `deadline-reminder.html`
+- `overdue-alert.html`
+- `task-assignment.html`
+- `status-update.html`
 
 ## Database Schema
 
-The relational database (PostgreSQL 15) schema is managed by Spring Data JPA and Hibernate based on the entity definitions.
+The relational database (PostgreSQL) schema is managed by Spring Data JPA and Hibernate based on the entity definitions.
 
 ### Entities
 
-Based on the actual entity implementations:
-
-* **User** (Base Entity): Represents a system user with authentication details.
-    * `id` (PK, Long)
+* **User**: Represents a system user with authentication details.
+    * `userId` (PK)
+    * `email` (Unique)
+    * `password` (Encrypted)
     * `firstName`
     * `lastName`
-    * `password` (excluded from toString)
-    * `email` (Unique, not null)
-    * `phoneNumber`
-    * `refreshToken` (excluded from toString)
-    * `userRole` (Enum: `ADMIN`, `MANAGER`, `DEVELOPER`)
+    * `role` (Enum: `ADMIN`, `PROJECT_MANAGER`, `DEVELOPER`, `USER`)
+    * `provider` (Enum: `LOCAL`, `GOOGLE`, `GITHUB`)
+    * `providerId`
+    * `emailVerified`
+    * `createdAt`
+    * `lastLoginAt`
 
-* **Admin** (extends User): Represents an administrator.
-    * `adminLevel` (String)
-    * Inherits all User fields
-    * Uses `JOINED` inheritance strategy
-    * Discriminator value: "ADMIN"
-
-* **Manager** (extends User): Represents a project manager.
-    * `department` (String)
-    * Inherits all User fields
-    * Uses `JOINED` inheritance strategy
-    * Discriminator value: "MANAGER"
-    * Note: Constructor currently sets role to ADMIN (potential bug to fix)
-
-* **Developer** (extends User): Represents a developer.
-    * `skill` (Enum: DevSkills - `FRONTEND`, `BACKEND`, `DEVOPS`, `QA`, etc.)
+* **Developer**: Represents a developer (extends User).
+    * `developerId` (PK)
+    * `name`
+    * `email`
+    * `skills` (Enum: `FRONTEND`, `BACKEND`, `DEVOPS`, `QA`)
     * `taskAssignments` (One-to-Many relationship with `TaskAssignment`)
-    * Inherits all User fields
-    * Uses `JOINED` inheritance strategy
-    * Discriminator value: "DEVELOPER"
 
 * **Project**: Represents a project.
     * `projectId` (PK)
@@ -516,7 +486,17 @@ Based on the actual entity implementations:
     * `completedOn`
     * `assignedBy` (Many-to-One relationship with `User`)
 
-### Audit Logs (MongoDB 6.0)
+* **EmailNotification**: Tracks sent email notifications.
+    * `notificationId` (PK)
+    * `recipientEmail`
+    * `subject`
+    * `notificationType` (Enum: `DEADLINE_REMINDER`, `OVERDUE_ALERT`, `ASSIGNMENT`, `STATUS_UPDATE`)
+    * `entityType` (e.g., "PROJECT", "TASK")
+    * `entityId`
+    * `sentAt`
+    * `status` (Enum: `PENDING`, `SENT`, `FAILED`)
+
+### Audit Logs (MongoDB)
 
 * **AuditLog**: Stores audit events in a MongoDB collection.
     * `id` (MongoDB PK)
@@ -531,12 +511,7 @@ Based on the actual entity implementations:
 ## API Endpoints
 
 The API documentation is available via Swagger UI. Once the application is running, navigate to:
-
-**Local Development:**
 [http://localhost:3232/swagger-ui.html](http://localhost:3232/swagger-ui.html)
-
-**Docker Compose:**
-[http://localhost:3333/swagger-ui.html](http://localhost:3333/swagger-ui.html)
 
 This will provide an interactive interface to explore all available endpoints, request/response schemas, and even try out API calls.
 
@@ -553,8 +528,8 @@ This will provide an interactive interface to explore all available endpoints, r
 * **OAuth2 Authentication:**
     * `GET /oauth2/authorization/google`: Initiate Google OAuth2 login
     * `GET /oauth2/authorization/github`: Initiate GitHub OAuth2 login
-    * `GET /login/oauth2/code/google`: Google OAuth2 callback endpoint
-    * `GET /login/oauth2/code/github`: GitHub OAuth2 callback endpoint
+    * `GET /oauth2/callback/google`: Google OAuth2 callback endpoint
+    * `GET /oauth2/callback/github`: GitHub OAuth2 callback endpoint
 
 * **User Profile:**
     * `GET /api/auth/me`: Get current user profile
@@ -577,23 +552,20 @@ Common endpoint patterns for other resources (require authentication):
 
 ## Caching
 
-The application leverages Spring Cache with Redis 7.0 as the caching provider with enhanced configuration:
+The application leverages Spring Cache with Redis as the caching provider.
 
-* **Cache Configuration:**
-  - TTL: 1 hour for cached entries
-  - Key prefix: `yourApp:` for namespace isolation
-  - Null values are not cached
-  - Statistics enabled for monitoring
-  - Lettuce client for better performance
-
-* **Cached Operations:**
-  - Project details (`@Cacheable`, `@CachePut`, `@CacheEvict`)
-  - JWT tokens for quick validation
-  - User session data for improved authentication performance
+* The `@EnableCaching` annotation is present in `ProjectTrackerApplication.java`.
+* `ProjectServiceImpl` uses `@Cacheable` and `@CachePut` on methods like `getProjectById` and `updateProject`, and `@CacheEvict` on `deleteProject` to manage the cache.
+* JWT tokens are cached in Redis for quick validation.
+* User session data is cached to improve authentication performance.
 
 ## Audit Logging
 
-Audit logs are stored in MongoDB 6.0. The `AuditLogService` is responsible for recording various actions, including authentication events, entity changes, and system activities.
+Audit logs are stored in a MongoDB database. The `AuditLogService` is responsible for recording various actions, including authentication events, entity changes, and system activities.
+
+* `AuditLog.java` defines the structure of audit records in MongoDB.
+* `AuditLogRepository.java` provides data access methods for audit logs.
+* `AuditLogService.java` contains methods to log specific actions and query audit records.
 
 Example logging actions:
 * `logLogin(userId, ipAddress, userAgent)`
@@ -613,32 +585,22 @@ The application implements global exception handling using `@ControllerAdvice` a
 * **Validation Errors**: Request body validation failures
 * **Business Logic Errors**: Resource not found, duplicate entities, invalid operations
 * **System Errors**: Database connectivity, email service failures
-* **Email Service Errors**: SMTP timeouts, authentication failures with retry mechanisms
 
 ## Building the Project
 
-The project uses a multi-stage Docker build for optimized production images:
+To build the project JAR file:
 
-**Build locally:**
 ```bash
 ./gradlew clean build
 ```
 
-**Build Docker image:**
-```bash
-docker build -t project-tracker:latest .
-```
+This will create a JAR file in the `build/libs` directory.
 
-**Build and run with Docker Compose:**
-```bash
-docker compose up --build -d
-```
+To build a Docker image:
 
-The Dockerfile uses:
-- `eclipse-temurin:21-jdk-jammy` for the build stage
-- `eclipse-temurin:21-jre-jammy` for the runtime stage
-- Multi-stage build for smaller production images
-- Gradle wrapper for consistent builds
+```bash
+./gradlew bootBuildImage --imageName=project-tracker:latest
+```
 
 ## Testing
 
@@ -662,37 +624,17 @@ For testing with security features:
 - Unit tests for services and repositories
 - Integration tests for API endpoints with authentication
 - Security tests for JWT and OAuth2 flows
-- Email service tests (with mock SMTP server and retry testing)
+- Email service tests (with mock SMTP server)
 - Scheduler tests for cron jobs
-- Cache performance tests
-- Multi-tool profiling tests
 
-**Performance Testing with Multiple Tools:**
-Use the comprehensive monitoring stack to profile the application:
+**Testing JWT Authentication:**
+Use the provided test utilities to generate test tokens for integration tests:
 
-1. **JMeter Load Testing:**
-   - Create test plans for API endpoints
-   - Simulate concurrent users
-   - Monitor response times and throughput
-   - Generate performance reports
-
-2. **JProfiler Analysis:**
-   - Connect to the running application
-   - Analyze memory usage patterns
-   - Identify CPU bottlenecks
-   - Monitor database connection pools
-
-3. **Grafana + Prometheus Monitoring:**
-   - Access Grafana dashboards for real-time metrics
-   - Monitor application performance trends
-   - Set up alerts for critical thresholds
-   - Track business metrics and system health
-
-4. **VisualVM Profiling:**
-   - Start the application with Docker Compose
-   - Connect VisualVM to `host.docker.internal:9010`
-   - Monitor heap dumps and thread behavior
-   - Analyze GC performance
-
-**Testing Email Retry Mechanisms:**
-The email service now includes comprehensive retry testing to ensure robustness against network issues and SMTP server problems.
+```java
+@TestComponent
+public class JwtTestUtils {
+    public String generateTestToken(String email, String role) {
+        // Generate test JWT token
+    }
+}
+```
